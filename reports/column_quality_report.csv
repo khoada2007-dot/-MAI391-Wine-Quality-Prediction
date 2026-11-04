@@ -1,0 +1,13 @@
+﻿,dtype,missing_count,missing_pct
+fixed acidity,float64,0,0.0
+volatile acidity,float64,0,0.0
+citric acid,float64,0,0.0
+residual sugar,float64,0,0.0
+chlorides,float64,0,0.0
+free sulfur dioxide,float64,0,0.0
+total sulfur dioxide,float64,0,0.0
+density,float64,0,0.0
+pH,float64,0,0.0
+sulphates,float64,0,0.0
+alcohol,float64,0,0.0
+quality,int64,0,0.0

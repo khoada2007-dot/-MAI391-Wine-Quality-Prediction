@@ -14,8 +14,8 @@ The [UCI Red Wine Quality dataset](https://archive.ics.uci.edu/dataset/186/wine+
 .
 ├── data/
 │   ├── winequality-red.csv           # Official UCI dataset (semicolon-separated)
-│   ├── train.csv                     # Generated: 1,279 rows including quality
-│   └── test.csv                      # Generated: 320 rows including quality
+│   ├── train.csv                     # Generated: 1,279 unscaled rows including quality
+│   └── test.csv                      # Generated: 320 unscaled rows including quality
 ├── notebooks/
 │   ├── Khoa_Dataset_Preprocessing.ipynb
 │   └── Dao_Mathematical_Foundation.ipynb
@@ -58,7 +58,7 @@ Run Jupyter from the repository root (`jupyter notebook`) or open the `.ipynb` i
 - Split: `train_test_split(X, y, test_size=0.2, random_state=42)`.
 - Train: **1,279 samples**; test: **320 samples**.
 - Duplicates **retained** for the baseline. This can produce identical full-record values in both train and test; discuss this limitation in the presentation.
-- Scaling is **optional**, not required for baseline. `StandardScaler` is fitted on **training data only**, then applied to test data without refitting.
+- Both `data/train.csv` and `data/test.csv` contain **unscaled** feature values and the original `quality` target. For optional scaling, use the `StandardScaler` saved in `models/standard_scaler.pkl`. It is fitted on **training features only** and transforms test features without refitting.
 - Do not independently re-split or reorder features in M4/M5 notebooks. `train.csv` / `test.csv` are the common datasets for the experiments.
 
 ## Files for team members

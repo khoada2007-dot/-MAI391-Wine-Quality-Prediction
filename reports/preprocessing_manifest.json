@@ -1,0 +1,36 @@
+{
+  "dataset": "UCI Wine Quality — Red",
+  "source_url": "https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv",
+  "source_sha256": "eed1f222f07f0ff48153f437bffd97d2a8cc60d3158bc458ed14b0a271f9cd3f",
+  "shape": [
+    1599,
+    12
+  ],
+  "features": [
+    "fixed acidity",
+    "volatile acidity",
+    "citric acid",
+    "residual sugar",
+    "chlorides",
+    "free sulfur dioxide",
+    "total sulfur dioxide",
+    "density",
+    "pH",
+    "sulphates",
+    "alcohol"
+  ],
+  "target": "quality",
+  "missing_cells": 0,
+  "duplicate_rows": 240,
+  "unique_rows": 1359,
+  "split": {
+    "test_size": 0.2,
+    "random_state": 42,
+    "train_size": 1279,
+    "test_size_rows": 320
+  },
+  "duplicate_policy": "retained for baseline",
+  "test_rows_matching_train_full_records": 64,
+  "unique_full_records_shared_between_train_test": 62,
+  "scaler": "models/standard_scaler.pkl (optional; fit on train only)"
+}
