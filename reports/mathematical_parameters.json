@@ -15,7 +15,7 @@
             "sulphates",
             "alcohol"
         ],
-        "bias": 14.355105201778496,
+        "intercept": 14.355105201778496,
         "weights": {
             "fixed acidity": 0.023085333915621953,
             "volatile acidity": -1.0013044340501895,
@@ -36,6 +36,8 @@
             "test_mae": 0.5035304415524378,
             "test_r2": 0.4031803412796233
         },
-        "max_discrepancy_normal_vs_sklearn": 1.081503775424153e-09
+        "max_weight_discrepancy": 5.0961634912027876e-09,
+        "intercept_discrepancy": 6.016449560775072e-09,
+        "max_prediction_discrepancy": 1.081503775424153e-09
     }
 }
