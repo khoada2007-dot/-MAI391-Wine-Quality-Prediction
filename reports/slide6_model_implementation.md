@@ -25,7 +25,7 @@ Slide 6 trình bày chi tiết quy trình hiện thực hóa mô hình **Multipl
      - **Training Time (1.279 mẫu):** $\approx 85.773\text{ ms}$.
      - **Prediction Time (Train - 1.279 mẫu):** $\approx 1.404\text{ ms}$ ($\approx 0.0011\text{ ms/mẫu}$).
      - **Prediction Time (Test - 320 mẫu):** $\approx 0.795\text{ ms}$ ($\approx 0.0025\text{ ms/mẫu}$).
-   - Đánh giá: Tốc độ huấn luyện và suy luận đều diễn ra trong tích tắc, chứng minh ưu thế vượt trội về mặt chi phí tính toán của giải thuật hồi quy tuyến tính giải tích.
+   - Đánh giá: Mô hình có chi phí tính toán rất thấp ở cả pha huấn luyện lẫn suy luận, phù hợp cho các bài toán yêu cầu phản hồi theo thời gian thực.
 
 ---
 
@@ -36,7 +36,7 @@ Slide 6 trình bày chi tiết quy trình hiện thực hóa mô hình **Multipl
 | Chỉ số (Metric) | Công thức toán học | Train Set (80%) | Test Set (20%) | Nhận xét phân tích |
 | :--- | :---: | :---: | :---: | :--- |
 | **MSE** | $\frac{1}{n}\sum (y_i - \hat{y}_i)^2$ | **0.4242** | **0.3900** | Sai số trên Test thấp hơn Train; không có dấu hiệu overfitting |
-| **RMSE** | $\sqrt{\text{MSE}}$ | **0.6513** | **0.6245** | Căn bậc hai trung bình bình phương sai số, phản ánh độ lệch chuẩn của phần dư theo đơn vị điểm chất lượng |
+| **RMSE** | $\sqrt{\text{MSE}}$ | **0.6513** | **0.6245** | Căn bậc hai trung bình bình phương sai số, đo lường độ lớn trung bình của sai số theo cùng đơn vị điểm chất lượng (phạt nặng sai số lớn) |
 | **MAE** | $\frac{1}{n}\sum \|y_i - \hat{y}_i\|$ | **0.4996** | **0.5035** | Sai số tuyệt đối trung bình $\approx 0.50$ điểm rượu |
 | **$R^2$ Score** | $1 - \frac{\sum (y_i - \hat{y}_i)^2}{\sum (y_i - \bar{y})^2}$ | **0.3480** | **0.4032** | Mô hình giải thích được $40.32\%$ biến thiên của điểm chất lượng |
 | **Prediction Time** | Đo bằng `time.perf_counter()` | **1.404 ms** | **0.795 ms** | Suy luận cực nhanh trên cả hai tập |
@@ -74,5 +74,5 @@ Mọi sản phẩm của Member 4 đã được tạo và lưu trực tiếp tro
 
 2. **Cột phải (Kết quả Baseline Model):**
    - Hộp số liệu nổi bật: Test MSE = $0.3900$, Test $R^2$ = $0.4032$, Test RMSE = $0.6245$, Test MAE = $0.5035$.
-   - Ý nghĩa RMSE: Độ lệch căn bậc hai trung bình bình phương giữa dự đoán và thực tế là $0.6245$ điểm trên thang điểm chất lượng 3–8.
+   - Ý nghĩa RMSE: Căn bậc hai trung bình bình phương sai số giữa điểm dự đoán và thực tế đạt $0.6245$ điểm trên thang đo chất lượng.
    - Vai trò: Đóng vai trò là cột mốc chuẩn (baseline) để so sánh với mô hình 1 biến (Experiment 2 của Thư).
