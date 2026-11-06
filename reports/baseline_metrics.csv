@@ -3,3 +3,5 @@ MSE,0.4242,0.3900
 RMSE,0.6513,0.6245
 MAE,0.4996,0.5035
 R²,0.3480,0.4032
+Training Time (ms),85.773,N/A
+Prediction Time (ms),1.404,0.795
