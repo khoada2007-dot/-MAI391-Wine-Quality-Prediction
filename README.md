@@ -18,7 +18,7 @@ The [UCI Red Wine Quality dataset](https://archive.ics.uci.edu/dataset/186/wine+
 │   └── test.csv                      # Generated: 320 unscaled rows including quality
 ├── notebooks/
 │   ├── Khoa_Dataset_Preprocessing.ipynb
-│   └── Dao_Mathematical_Foundation.ipynb
+│   └── Dao_Mathematical_Foundation_fixed.ipynb
 ├── reports/
 │   ├── column_quality_report.csv
 │   ├── mathematical_parameters.json
