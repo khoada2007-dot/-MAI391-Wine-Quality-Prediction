@@ -13,7 +13,7 @@ Slide 5 tập trung trình bày nền tảng toán học của mô hình **Multi
 
 1. **Biểu diễn ma trận & vector dữ liệu:** $X \in \mathbb{R}^{n \times 11}$, $y \in \mathbb{R}^n$, $w \in \mathbb{R}^{11}$, $b \in \mathbb{R}$.
 2. **Hàm mất mát Mean Squared Error (MSE):** Dạng tổng vô hướng và dạng chuẩn Euclidean đại số tuyến tính.
-3. **Nghiệm bình phương tối thiểu (Least Squares & Normal Equation):** Ma trận thiết kế mở rộng $X_b$ và nghiệm giải tích đóng $\theta^* = (X_b^T X_b)^{-1} X_b^T y$.
+3. **Nghiệm bình phương tối thiểu (Least Squares & Normal Equation):** Ma trận thiết kế mở rộng $X_b$ và nghiệm giải tích đóng $\theta^* = (X_b^T X_b)^{-1} X_b^T y$ với điều kiện ma trận $X_b$ đạt đủ hạng cột (**full column rank**, $\text{rank}(X_b) = 12$).
 4. **Cầu nối giữa công thức toán học và Scikit-Learn:** Bảng ánh xạ đối chiếu biến toán học sang thuộc tính code (`coef_`, `intercept_`, `predict`).
 
 ---
@@ -87,7 +87,7 @@ $$
 \nabla_\theta J(\theta) = \frac{2}{n} (X_b^T X_b \theta - X_b^T y) = \mathbf{0} \implies X_b^T X_b \theta = X_b^T y
 $$
 
-Khi ma trận Gram $X_b^T X_b$ khả nghịch (full column rank):
+Khi ma trận Gram $X_b^T X_b$ khả nghịch (điều kiện ma trận thiết kế $X_b$ đạt đủ hạng cột - **full column rank**, $\text{rank}(X_b) = 12$):
 $$
 \theta^* = (X_b^T X_b)^{-1} X_b^T y
 $$
@@ -101,12 +101,15 @@ $$
 | Công thức toán học | Trong Scikit-Learn | Giá trị cụ thể từ mô hình huấn luyện | Ý nghĩa toán học trong mô hình |
 | :--- | :--- | :--- | :--- |
 | **Hệ số chặn $b$ (Intercept)** | `model.intercept_` | **$14.355105$** | Giá trị toán học tại gốc tọa độ (khi $x = \mathbf{0}$) của siêu phẳng hồi quy |
-| **Vector trọng số $w$** | `model.coef_` | Mảng 11 giá trị thực (xem bảng mục 4) | Hệ số hồi quy tuyến tính ứng với từng đặc trưng theo đơn vị đo gốc |
+| **Vector trọng số $w$** | `model.coef_` | Mảng 11 giá trị thực (xem bảng mục 4) | Hệ số cho biết hướng thay đổi dự đoán của `quality` khi feature tương ứng tăng một đơn vị, giữ các feature khác cố định. |
 | **Dự đoán $\hat{y} = Xw + b$** | `model.predict(X)` | Array 320 phần tử trên Test Set | Nhân ma trận và cộng bias để đưa ra điểm dự đoán |
 | **Nghiệm tối ưu $\theta^*$** | `model.fit(X, y)` | SVD / QR Least Squares | Tìm nghiệm Least Squares giảm thiểu hàm mất mát MSE |
 | **Hàm mất mát MSE** | `mean_squared_error(y, y_pred)` | **$0.424191$** (Train), **$0.390025$** (Test) | Trung bình bình phương khoảng cách Euclidean giữa dự đoán và thực tế |
 
-> **Điểm cần lưu ý khi thuyết trình:**
+> **Lưu ý về cách diễn giải hệ số hồi quy (`coef_`):**
+> `coef_` là hệ số hồi quy có điều kiện, không phải hệ số tương quan Pearson. Dấu của hệ số cho biết hướng thay đổi dự đoán của `quality` khi feature tương ứng tăng một đơn vị, giữ các feature khác cố định. Không thể dựa vào hệ số này để kết luận về quan hệ nhân quả giữa feature và chất lượng rượu vang.
+>
+> **Lưu ý phương pháp luận:**
 > 1. **Về thuật toán tối ưu:** Normal Equation $\theta^* = (X_b^T X_b)^{-1} X_b^T y$ là nghiệm giải tích lý thuyết. Trong code thực tế, thư viện Scikit-learn tìm nghiệm Least Squares thông qua thuật toán giải số bền vững **phân rã giá trị kỳ dị (SVD - Singular Value Decomposition)** qua LAPACK (`scipy.linalg.lstsq`) thay vì trực tiếp tính nghịch đảo ma trận, giúp hạn chế sai số số học và vấn đề ma trận điều kiện kém (ill-conditioned matrix).
 > 2. **Về ý nghĩa của Intercept ($b = 14.355105$):** Đây là giá trị hằng số toán học dịch chuyển siêu phẳng tại gốc tọa độ khi vector đặc trưng bằng không ($x = \mathbf{0}_{11}$). Trong thực tế hóa lý của rượu vang, một mẫu rượu không thể có nồng độ cồn, độ pH hay tỷ trọng bằng 0; do đó giá trị này mang ý nghĩa định vị hình học của siêu phẳng toán học chứ không đại diện cho một mẫu rượu thực tế.
 
@@ -114,21 +117,21 @@ $$
 
 ## 4. Giá trị hệ số hồi quy theo đúng thứ tự 11 đặc trưng
 
-*(Lưu ý: Mô hình Baseline được huấn luyện trên dữ liệu thang đo gốc chưa chuẩn hóa (unscaled), do đó độ lớn của các hệ số phản ánh thang đo đơn vị tự nhiên của từng thuộc tính chứ không dùng để so sánh mức độ quan trọng trực tiếp giữa các biến; dấu của hệ số thể hiện xu hướng tương quan tuyến tính có điều kiện).*
+*(Lưu ý: Mô hình Baseline được huấn luyện trên dữ liệu thang đo gốc chưa chuẩn hóa (unscaled), do đó độ lớn của các hệ số phản ánh thang đo đơn vị tự nhiên của từng thuộc tính chứ không dùng để so sánh mức độ quan trọng trực tiếp giữa các biến; dấu của hệ số thể hiện hướng thay đổi dự đoán có điều kiện khi tăng một đơn vị feature tương ứng, không suy ra quan hệ nhân quả).*
 
-| $j$ | Đặc trưng (Feature) | Toán học $w_j^*$ | Scikit-learn `model.coef_[j]` | Chiều hướng tương quan tuyến tính |
+| $j$ | Đặc trưng (Feature) | Toán học $w_j^*$ | Scikit-learn `model.coef_[j]` | Hướng thay đổi dự đoán (`quality`) |
 | :---: | :--- | :---: | :---: | :--- |
-| 1 | `fixed acidity` | $+0.023085$ | $+0.023085$ | Dương |
-| 2 | `volatile acidity` | $-1.001304$ | $-1.001304$ | Âm |
-| 3 | `citric acid` | $-0.140821$ | $-0.140821$ | Âm |
-| 4 | `residual sugar` | $+0.006564$ | $+0.006564$ | Dương |
-| 5 | `chlorides` | $-1.806503$ | $-1.806503$ | Âm |
-| 6 | `free sulfur dioxide` | $+0.005627$ | $+0.005627$ | Dương |
-| 7 | `total sulfur dioxide` | $-0.003644$ | $-0.003644$ | Âm |
-| 8 | `density` | $-10.351594$ | $-10.351594$ | Âm (hệ số lớn do thang đo density biến thiên trong khoảng rất hẹp $\sim 0.99 - 1.00$) |
-| 9 | `pH` | $-0.393688$ | $-0.393688$ | Âm |
-| 10 | `sulphates` | $+0.841172$ | $+0.841172$ | Dương |
-| 11 | `alcohol` | $+0.281890$ | $+0.281890$ | Dương |
+| 1 | `fixed acidity` | $+0.023085$ | $+0.023085$ | Tăng |
+| 2 | `volatile acidity` | $-1.001304$ | $-1.001304$ | Giảm |
+| 3 | `citric acid` | $-0.140821$ | $-0.140821$ | Giảm |
+| 4 | `residual sugar` | $+0.006564$ | $+0.006564$ | Tăng |
+| 5 | `chlorides` | $-1.806503$ | $-1.806503$ | Giảm |
+| 6 | `free sulfur dioxide` | $+0.005627$ | $+0.005627$ | Tăng |
+| 7 | `total sulfur dioxide` | $-0.003644$ | $-0.003644$ | Giảm |
+| 8 | `density` | $-10.351594$ | $-10.351594$ | Giảm (hệ số lớn do thang đo density biến thiên trong khoảng rất hẹp $\sim 0.99 - 1.00$) |
+| 9 | `pH` | $-0.393688$ | $-0.393688$ | Giảm |
+| 10 | `sulphates` | $+0.841172$ | $+0.841172$ | Tăng |
+| 11 | `alcohol` | $+0.281890$ | $+0.281890$ | Tăng |
 
 - **Kiểm chứng sai lệch số học:**
   - Sai lệch tuyệt đối của hệ số trọng số: $\Delta_w \approx 5.10 \times 10^{-9}$
@@ -143,9 +146,10 @@ $$
 1. **Nửa bên trái (Nền tảng toán học):**
    - Biểu diễn mô hình: $\hat{y} = Xw + b$ với $X \in \mathbb{R}^{n \times 11}$.
    - Hàm mất mát MSE: $J(\theta) = \frac{1}{n} \| y - X_b \theta \|_2^2$.
-   - Phương trình chuẩn (Normal Equation): $\theta^* = (X_b^T X_b)^{-1} X_b^T y$.
+   - Phương trình chuẩn (Normal Equation): $\theta^* = (X_b^T X_b)^{-1} X_b^T y$ (điều kiện ma trận thiết kế $X_b$ đạt đủ hạng cột - **full column rank**, $\text{rank}(X_b) = 12$).
 
 2. **Nửa bên phải (Liên hệ Scikit-Learn & Bản chất thuật toán):**
    - Hộp đối chiếu: $w \leftrightarrow \text{model.coef\_}$, $b \leftrightarrow \text{model.intercept\_}$.
    - Bản chất nghiệm: Scikit-learn sử dụng thuật toán **phân rã giá trị kỳ dị (SVD)** để tính Least Squares bền vững thay vì nghịch đảo ma trận trực tiếp.
+   - Diễn giải `coef_`: Hệ số hồi quy có điều kiện (khác tương quan Pearson), không suy diễn nhân quả.
    - Diễn giải Intercept: Là hằng số toán học tại vector zero $x = \mathbf{0}$, không đại diện cho mẫu rượu thực tế.
