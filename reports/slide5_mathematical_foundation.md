@@ -53,15 +53,20 @@ $$
 
 ---
 
-### 2.2. Hàm mất mát Mean Squared Error (MSE)
+### 2.2. Hàm mất mát Mean Squared Error (MSE) & Biểu diễn vector hóa
 
 $$
 J(w, b) = \frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2 = \frac{1}{n} \| y - (X w + b \mathbf{1}_n) \|_2^2
 $$
 
+Để thuận tiện cho đại số ma trận, ta gộp hệ số chặn vào vector tham số $\theta = [b, w_1, \dots, w_{11}]^T \in \mathbb{R}^{12}$ và thêm cột toàn 1 vào ma trận đầu vào tạo thành ma trận thiết kế mở rộng $X_b = [\mathbf{1}_n \quad X] \in \mathbb{R}^{n \times 12}$. Khi đó $\hat{y} = X_b \theta$, hàm mất mát trở thành:
+$$
+J(\theta) = \frac{1}{n} \| y - X_b \theta \|_2^2 = \frac{1}{n} (y - X_b \theta)^T (y - X_b \theta)
+$$
+
 - **Ý nghĩa toán học & Điều kiện nghiệm:**
   - Tránh việc sai số âm dương triệt tiêu lẫn nhau; phạt nặng hơn các sai số dự đoán lớn qua bình phương sai lệch.
-  - Ma trận Hessian của hàm mất mát theo tham số là $\nabla^2 J = \frac{2}{n} X_b^T X_b$ luôn là ma trận nửa xác định dương (positive semi-definite), do đó $J$ là một hàm lồi (convex function). Tính lồi đảm bảo mọi điểm dừng (stationary point) đều là điểm cực tiểu toàn cục.
+  - Ma trận Hessian của hàm mất mát theo tham số $\theta$ là $\nabla_\theta^2 J(\theta) = \frac{2}{n} X_b^T X_b$ luôn là ma trận nửa xác định dương (positive semi-definite) với mọi $X_b$, do đó $J(\theta)$ là một hàm lồi (convex function). Tính lồi đảm bảo mọi điểm dừng (stationary point) đều là điểm cực tiểu toàn cục.
   - **Điều kiện nghiệm duy nhất:** Tính lồi thuần túy chưa đủ để đảm bảo nghiệm là duy nhất (nếu các đặc trưng phụ thuộc tuyến tính thì hệ phương trình chuẩn có vô số nghiệm tối ưu). Nghiệm cực tiểu toàn cục chỉ **duy nhất** khi và chỉ khi ma trận thiết kế $X_b$ có các cột độc lập tuyến tính (đạt đủ hạng cột - **full column rank**, $\text{rank}(X_b) = d + 1 = 12$). Khi đó ma trận Gram $X_b^T X_b$ xác định dương chặt (strictly positive definite) và khả nghịch, cho phép tìm được duy nhất một nghiệm giải tích $\theta^* = (X_b^T X_b)^{-1} X_b^T y$.
 
 ---
