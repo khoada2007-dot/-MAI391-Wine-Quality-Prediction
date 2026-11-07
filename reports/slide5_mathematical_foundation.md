@@ -117,9 +117,9 @@ $$
 
 ## 4. Giá trị hệ số hồi quy theo đúng thứ tự 11 đặc trưng
 
-*(Lưu ý: Mô hình Baseline được huấn luyện trên dữ liệu thang đo gốc chưa chuẩn hóa (unscaled), do đó độ lớn của các hệ số phản ánh thang đo đơn vị tự nhiên của từng thuộc tính chứ không dùng để so sánh mức độ quan trọng trực tiếp giữa các biến; dấu của hệ số thể hiện hướng thay đổi dự đoán có điều kiện khi tăng một đơn vị feature tương ứng, không suy ra quan hệ nhân quả).*
+*(Lưu ý: Mô hình Baseline được huấn luyện trên dữ liệu thang đo gốc chưa chuẩn hóa (unscaled), do đó độ lớn của các hệ số phản ánh thang đo đơn vị tự nhiên của từng thuộc tính chứ không dùng để so sánh mức độ quan trọng trực tiếp giữa các biến; dấu của hệ số cho biết hướng thay đổi dự đoán khi feature tăng một đơn vị, giữ các feature khác cố định; đây là hệ số hồi quy có điều kiện, không phải hệ số tương quan Pearson và không suy ra quan hệ nhân quả).*
 
-| $j$ | Đặc trưng (Feature) | Toán học $w_j^*$ | Scikit-learn `model.coef_[j]` | Hướng thay đổi dự đoán (`quality`) |
+| $j$ | Đặc trưng (Feature) | Toán học $w_j^*$ | Scikit-learn `model.coef_[j]` | Hướng thay đổi dự đoán khi feature tăng một đơn vị, giữ các feature khác cố định |
 | :---: | :--- | :---: | :---: | :--- |
 | 1 | `fixed acidity` | $+0.023085$ | $+0.023085$ | Tăng |
 | 2 | `volatile acidity` | $-1.001304$ | $-1.001304$ | Giảm |
