@@ -1,0 +1,43 @@
+{
+    "mathematical_foundation": {
+        "description": "Nền tảng toán học mô hình Multiple Linear Regression cho dự án Wine Quality",
+        "author": "Dao (Member 3)",
+        "features": [
+            "fixed acidity",
+            "volatile acidity",
+            "citric acid",
+            "residual sugar",
+            "chlorides",
+            "free sulfur dioxide",
+            "total sulfur dioxide",
+            "density",
+            "pH",
+            "sulphates",
+            "alcohol"
+        ],
+        "intercept": 14.355105201778496,
+        "weights": {
+            "fixed acidity": 0.023085333915621953,
+            "volatile acidity": -1.0013044340501895,
+            "citric acid": -0.1408214612126619,
+            "residual sugar": 0.006564311043392815,
+            "chlorides": -1.8065031492245056,
+            "free sulfur dioxide": 0.005627334387055483,
+            "total sulfur dioxide": -0.0036444489338551757,
+            "density": -10.351593593926644,
+            "pH": -0.3936877323019019,
+            "sulphates": 0.8411716226158708,
+            "alcohol": 0.28188956740272886
+        },
+        "metrics": {
+            "train_mse": 0.4241911573139901,
+            "test_mse": 0.390025143963954,
+            "test_rmse": 0.6245199307980123,
+            "test_mae": 0.5035304415524378,
+            "test_r2": 0.4031803412796233
+        },
+        "max_weight_discrepancy": 5.0961634912027876e-09,
+        "intercept_discrepancy": 6.016449560775072e-09,
+        "max_prediction_discrepancy": 1.081503775424153e-09
+    }
+}
