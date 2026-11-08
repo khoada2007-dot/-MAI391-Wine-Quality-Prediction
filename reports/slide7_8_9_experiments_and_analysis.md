@@ -76,8 +76,11 @@ Slide 8 làm sáng tỏ bản chất toán học của mô hình OLS thông qua 
   2. *Chẩn đoán thực nghiệm ngoài mẫu trên tập Test (Empirical Diagnostic):* Trên tập test độc lập, các phần dư không bị ràng buộc toán học phải trực giao với $\hat{\mathbf{y}}$. Độ dốc mẫu $+0.0987 \approx +0.10$ là một **chỉ báo chẩn đoán thực nghiệm ngoài mẫu**, cho thấy phần dư kiểm thử chỉ xuất hiện độ lệch tuyến tính rất nhẹ theo giá trị dự đoán.
   3. *Thực tế về giả định Gauss-Markov:* Trong dải dự đoán trung tâm $[5.2, 6.2]$, phần dư phân tán tương đối đồng đều quanh trục $e=0$. Tuy nhiên, trên toàn cục, do biến mục tiêu $y$ bị chặn trên và chặn dưới trong miền $[3, 8]$, phần dư ở vùng biên chịu ràng buộc giới hạn (boundary constraints), gây ra hiện tượng phương sai thay đổi có điều kiện (conditional heteroscedasticity) tại các mức điểm cực đoan.
 
-### 3.3. Phân tích Biểu đồ 3 & 4: Phân phối phần dư & Bóc tách sai số theo phân lớp (`reports/error_by_quality_tier.png`)
-- **Bảng số liệu phân tách theo từng mức điểm thực tế (Breakdown Table):**
+### 3.3. Phân tích Biểu đồ 3 & 4: Phân phối phần dư & Bóc tách sai số theo phân lớp (`reports/baseline_residual_distribution.png` & `reports/error_by_quality_tier.png`)
+- **Phân tích Biểu đồ 3 (Phân phối phần dư thực nghiệm):**
+  - Histogram mật độ phần dư và đường cong chuẩn hóa ($\mu = +0.033, \sigma = 0.624$) cho thấy phần dư tập trung cao quanh trục 0 và có dạng hình chuông tương đối đối xứng.
+  - *Lưu ý học thuật quan trọng:* Đây là **đánh giá trực quan hình dáng phân phối thực nghiệm (Visual Normality Assessment)**, không phải là một bài kiểm định giả thuyết chính thức (như Shapiro-Wilk hay Jarque-Bera). Cần nhấn mạnh rằng định lý Gauss-Markov không đòi hỏi phần dư phải tuân theo phân phối chuẩn để nghiệm OLS là BLUE (Best Linear Unbiased Estimator); phân phối chuẩn chỉ phục vụ cho việc suy diễn thống kê và xây dựng khoảng tin cậy.
+- **Phân tích Biểu đồ 4 & Bảng số liệu phân tách theo từng mức điểm thực tế (Breakdown Table):**
 
 | Điểm chất lượng ($y$) | Số mẫu Test ($n$) | Tỷ lệ (%) | Điểm dự đoán TB ($\bar{\hat{y}}$) | Độ lệch trung bình (Bias: $y - \hat{y}$) | MAE | Nhận xét kinh tế lượng |
 | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
@@ -221,7 +224,7 @@ Slide 9 thể hiện tư duy phản biện khoa học (Critical Thinking) của 
 | 5 | **Bảng phân tích sai số theo phân lớp** | [`reports/error_by_quality_metrics.csv`](error_by_quality_metrics.csv) | Chi tiết số lượng mẫu, MAE, Bias theo từng mức điểm từ 3 đến 8 | ✅ Đã kiểm định |
 | 6 | **Biểu đồ Actual vs. Predicted** | [`reports/baseline_actual_vs_predicted.png`](baseline_actual_vs_predicted.png) | Biểu đồ 300 DPI có đường $y=\hat{y}$, chú thích sọc ngang và co về trung bình | ✅ Đã kiểm định |
 | 7 | **Biểu đồ Residual Plot** | [`reports/baseline_residual_plot.png`](baseline_residual_plot.png) | Biểu đồ 300 DPI thể hiện đường $e=0$, trendline thực nghiệm (Slope = +0.10) và phân tích phương sai | ✅ Đã kiểm định |
-| 8 | **Biểu đồ Phân phối phần dư** | [`reports/baseline_residual_distribution.png`](baseline_residual_distribution.png) | Histogram và đường khớp chuẩn kiểm tra giả định Gauss-Markov | ✅ Đã kiểm định |
+| 8 | **Biểu đồ Phân phối phần dư** | [`reports/baseline_residual_distribution.png`](baseline_residual_distribution.png) | Histogram và đường khớp chuẩn đánh giá trực quan hình dáng phân phối thực nghiệm của phần dư (Visual Normality Assessment) | ✅ Đã kiểm định |
 | 9 | **Biểu đồ Sai số theo phân lớp** | [`reports/error_by_quality_tier.png`](error_by_quality_tier.png) | Biểu đồ kép thể hiện sự mất cân bằng dữ liệu và sai số vượt trội ở vùng biên | ✅ Đã kiểm định |
 | 10 | **Tài liệu bàn giao Slide 7, 8, 9** | [`reports/slide7_8_9_experiments_and_analysis.md`](slide7_8_9_experiments_and_analysis.md) | Tài liệu hướng dẫn ráp slide, kịch bản thuyết trình và bộ câu hỏi phản biện chuẩn kinh tế lượng | ✅ Đã kiểm định |
-| 11 | **Bộ kiểm thử tự động toàn diện** | [`test_thu_deliverables.py`](../test_thu_deliverables.py) | Bộ 50/50 tests kiểm định cả 2 lớp Kỹ thuật & Học thuật, bao gồm Restart & Run All check | ✅ Đã kiểm định |
+| 11 | **Bộ kiểm thử tự động toàn diện** | [`test_thu_deliverables.py`](../test_thu_deliverables.py) | Bộ 55/55 tests kiểm định toàn diện cả 2 lớp Kỹ thuật & Học thuật, bao gồm Restart & Run All check | ✅ Đã kiểm định |
