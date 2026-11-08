@@ -1,4 +1,4 @@
-# Bàn giao Nội dung Slide 7, 8, 9: Thực nghiệm, Phân tích sai số & Hạn chế của mô hình
+# Bàn giao Nội dung Slide 7, 8, 9: Thực nghiệm, Chẩn đoán sai số & Hạn chế của mô hình
 
 - **Người phụ trách:** Thư (Member 5 — Experiments & Error Analysis)
 - **Học phần:** MAI391 — Mathematics for Machine Learning
@@ -7,124 +7,118 @@
   - **Slide 7:** Experimental Results *(Phối hợp cùng Member 4 — Khuê)*
   - **Slide 8:** Visualization & Discussion *(Member 5 độc lập)*
   - **Slide 9:** Limitations *(Member 5 độc lập)*
-- **Thời hạn hoàn thành:** 07/11, 22:00 (Sẵn sàng cho QC tổng hợp 08/11 và thuyết trình 09/11)
+- **Thời hạn hoàn thành:** 07/11, 22:00 (Đã hoàn thiện nghiệm thu và kiểm định học thuật)
 
 ---
 
 ## 1. Tổng quan vị trí & Sự kết nối học thuật trong dự án
 
-Member 5 (Thư) đảm nhiệm khâu **kiểm định thực nghiệm (Empirical Validation)**, **chẩn đoán sai số toán học (Residual Diagnostics)** và **đánh giá phê phán (Critical Evaluation)**. 
+Member 5 (Thư) đảm nhiệm khâu **kiểm định thực nghiệm (Empirical Validation)**, **chẩn đoán sai số mô hình (Residual Diagnostics)** và **đánh giá phê phán dưới góc nhìn kinh tế lượng (Econometric & Critical Evaluation)**.
 
-Toàn bộ công việc kết nối chặt chẽ với các thành viên khác:
-1. **Tiếp nhận từ Member 1 (Khoa) & Member 4 (Khuê):** Kế thừa nguyên vẹn phân chia dữ liệu chuẩn `data/train.csv` (1.279 mẫu) và `data/test.csv` (320 mẫu), cùng kết quả dự đoán của mô hình 11 biến từ `reports/baseline_test_predictions.csv` mà không huấn luyện lại từ đầu.
-2. **Đối chiếu với Member 2 (Thảo - EDA):** Kiểm chứng lại nhận định từ ma trận tương quan rằng `alcohol` có tương quan cao nhất ($r \approx +0.476$) để thiết kế **Experiment 2 (Mô hình đơn biến `alcohol`)**.
-3. **Liên hệ với Member 3 (Đào - Math Foundation):** Giải thích hành vi sai số thực nghiệm thông qua lý thuyết hàm mất mát MSE ($L_2$ loss), tính chất trực giao của phần dư trong nghiệm Least Squares và hiện tượng hồi quy về giá trị trung bình (Regression toward the mean).
-4. **Bàn giao cho Member 6 (Quân - Coordinator/QC):** Cung cấp toàn bộ bảng số liệu, biểu đồ độ phân giải cao (300 DPI), bố cục gợi ý cho 3 slide và kịch bản thuyết trình chi tiết.
+Toàn bộ công việc kết nối chặt chẽ và nhất quán với các thành viên trong nhóm:
+1. **Tiếp nhận từ Member 1 (Khoa) & Member 4 (Khuê):** Kế thừa nguyên vẹn tập dữ liệu chuẩn `data/train.csv` (1.279 mẫu) và `data/test.csv` (320 mẫu). Nạp trực tiếp mô hình đã huấn luyện từ `models/baseline_linear_regression.joblib` và kết quả dự đoán từ `reports/baseline_test_predictions.csv`, **tuyệt đối không huấn luyện lại mô hình 11 biến từ đầu**.
+2. **Đối chiếu với Member 2 (Thảo - EDA):** Kiểm chứng lại nhận định từ ma trận tương quan rằng `alcohol` có tương quan tuyến tính mẫu lớn nhất với điểm chất lượng ($r \approx +0.476$) để thiết lập **Experiment 2 (Mô hình đơn biến `alcohol`)**.
+3. **Liên hệ với Member 3 (Đào - Math Foundation):** Kết nối nghiệm giải tích Ordinary Least Squares (OLS) với các thuộc tính của hàm mất mát Mean Squared Error ($L_2$ loss), cơ chế hồi quy về giá trị trung bình (Regression toward the mean) và phân biệt rạch ròi giữa **tính trực giao giải tích trên tập Train** với **chẩn đoán thực nghiệm ngoài mẫu trên tập Test**.
+4. **Bàn giao cho Member 6 (Quân - Coordinator/QC):** Cung cấp toàn bộ bảng số liệu chuẩn xác, 4 biểu đồ 300 DPI, bố cục slide gợi ý và kịch bản thuyết trình khoa học, thận trọng về mặt thống kê.
 
 ---
 
-## 2. Chi tiết Slide 7: Experimental Results (Kết quả thực nghiệm & So sánh mô hình)
+## 2. Chi tiết Slide 7: Experimental Results (Kết quả thực nghiệm & So sánh năng lực dự báo)
 
 ### 2.1. Thiết kế thực nghiệm
-- **Experiment 1 (Baseline — Khuê phụ trách):** Sử dụng toàn bộ 11 đặc trưng hóa lý trên thang đo gốc.
-- **Experiment 2 (Univariate — Thư phụ trách):** Chỉ sử dụng duy nhất đặc trưng `alcohol` để xây dựng mô hình đơn biến:
+- **Mô hình đa biến Baseline (11 đặc trưng — Khuê phụ trách):** Sử dụng toàn bộ 11 đặc trưng hóa lý trên thang đo tự nhiên (unscaled).
+- **Mô hình đơn biến Experiment 2 (1 đặc trưng — Thư phụ trách):** Chỉ sử dụng đặc trưng `alcohol` để xây dựng mô hình hồi quy đơn biến:
   $$\hat{y} = w_{\text{alcohol}} \cdot x_{\text{alcohol}} + b = 0.3623 \cdot \text{alcohol} + 1.8493$$
-- **Mục tiêu so sánh:** Định lượng xem một đặc trưng đơn lẻ có tương quan mạnh nhất có thể giải thích được bao nhiêu phần trăm biến thiên của điểm chất lượng, và việc đưa thêm 10 đặc trưng còn lại mang lại giá trị gia tăng cụ thể là bao nhiêu.
+- **Mục tiêu so sánh:** Đánh giá năng lực dự báo tuyến tính giữa một mô hình tối giản chỉ dùng thuộc tính có tương quan đơn biến cao nhất với mô hình đa biến kết hợp đầy đủ 11 chỉ số hóa lý.
 
 ### 2.2. Bảng số liệu đối chuẩn thực nghiệm trên Test Set (320 mẫu)
 
-| Chỉ số (Metric) | Baseline (11 features) | Alcohol only (1 feature) | Chênh lệch ($\Delta$) | Ý nghĩa toán học & phân tích thực nghiệm |
+| Chỉ số (Metric) | Baseline (11 features) | Alcohol only (1 feature) | Chênh lệch ($\Delta$) | Phân tích học thuật & Ý nghĩa thực nghiệm |
 | :--- | :---: | :---: | :---: | :--- |
-| **MSE** | **0.3900** | 0.4995 | $-0.1095$ ($-21.92\%$) | Đưa 11 đặc trưng giúp giảm $21.92\%$ tổng bình phương sai số so với mô hình 1 biến |
-| **RMSE** | **0.6245** | 0.7068 | $-0.0823$ ($-11.64\%$) | Sai số trung bình của Baseline là $0.62$ điểm, tốt hơn đáng kể mức $0.71$ điểm của mô hình 1 biến |
-| **MAE** | **0.5035** | 0.5750 | $-0.0714$ ($-12.42\%$) | Sai số tuyệt đối trung bình giảm khoảng $0.07$ điểm rượu khi dùng đủ 11 biến |
-| **$R^2$ Score** | **0.4032 (40.32%)** | **0.2356 (23.56%)** | $+0.1676$ ($+16.76\%$) | `alcohol` giải thích được $23.56\%$ phương sai; 10 biến còn lại đóng góp thêm $16.76\%$ |
-| **Inference Time** | **0.795 ms** | 0.450 ms | $+0.345\text{ ms}$ | Cả hai mô hình đều có thời gian suy luận cực nhanh ($< 1\text{ ms}$ cho 320 mẫu) |
+| **MSE** | **0.390025** | 0.499528 | $-0.109503$ ($-21.92\%$) | Mô hình đa biến giảm $21.92\%$ tổng bình phương sai số so với mô hình đơn biến |
+| **RMSE** | **0.624520** | 0.706773 | $-0.082253$ ($-11.64\%$) | Sai số trung bình của Baseline là $0.62$ điểm, thấp hơn mức $0.71$ điểm của mô hình 1 biến |
+| **MAE** | **0.503530** | 0.574966 | $-0.071436$ ($-12.42\%$) | Sai số tuyệt đối trung bình giảm $\approx 0.07$ điểm rượu khi dùng đủ 11 biến |
+| **$R^2$ Score** | **0.403180 (40.32%)** | **0.235618 (23.56%)** | $+0.167562$ ($+16.76\%$) | Mô hình đa biến đạt $R^2$ cao hơn $16.76$ điểm phần trăm so với mô hình đơn biến |
+| **Inference Time\*** | $\approx 0.80\text{ ms}$ | $\approx 0.45\text{ ms}$ | $+0.35\text{ ms}$ | Cả hai mô hình đều có chi phí tính toán cực thấp ($< 1\text{ ms}$ cho 320 mẫu) |
 
-### 2.3. Ba nhận xét cốt lõi cho Slide 7
-1. **Vai trò chủ đạo của `alcohol`:**
-   Một mình đặc trưng `alcohol` đã chiếm tới **$58.4\%$ năng lực giải thích** của toàn bộ mô hình 11 biến ($23.56\% / 40.32\% \approx 58.4\%$). Điều này giải thích tại sao trong ngành sản xuất rượu vang, nồng độ cồn quyết định rất lớn tới cảm giác "đậm đà" (body) và độ cân bằng vị giác của rượu.
-2. **Giá trị gia tăng của 10 đặc trưng còn lại:**
-   Mặc dù `alcohol` chiếm ưu thế, việc kết hợp thêm 10 thuộc tính hóa lý (axit bay hơi, sulphates, độ chua cố định, pH, đường dư, v.v.) là điều bắt buộc để:
-   - Tăng hệ số giải thích $R^2$ từ $23.56\%$ lên $40.32\%$ ($+71\%$ sức mạnh dự báo tương đối).
-   - Giảm sai số MSE đi $21.9\%$.
-   - Chứng minh chất lượng rượu là bài toán đa chiều hóa học (multidimensional physicochemical problem), không thể đơn giản hóa bằng một biến số duy nhất.
-3. **Độ ổn định và khả năng tổng quát hóa (Generalization):**
-   Trên mô hình Baseline, Test MSE ($0.3900$) thậm chí thấp hơn Train MSE ($0.4242$), chứng minh mô hình hoàn toàn không bị Overfitting và nghiệm Least Squares tìm được có tính tổng quát hóa cao.
+*\*Ghi chú về thời gian thực thi (Timing Benchmark): Thời gian huấn luyện ($\approx 15-85\text{ ms}$) và thời gian suy luận ($\approx 0.5-1.4\text{ ms}$) được đo bằng `time.perf_counter()` mang tính chất tham khảo phần cứng trên môi trường máy tính cụ thể; không dùng để kết luận tuyệt đối về độ phức tạp tính toán giữa các thuật toán.*
+
+### 2.3. Ba nhận xét cốt lõi dưới góc nhìn Kinh tế lượng cho Slide 7
+1. **So sánh năng lực giải thích phương sai tuyến tính của `alcohol`:**
+   Mô hình đơn biến `alcohol` đạt $R^2 = 23.56\%$, tương đương **$58.44\%$ tỷ lệ $R^2$** của mô hình 11 biến ($0.2356 / 0.4032$). Điều này cho thấy nồng độ cồn mang lượng thông tin tuyến tính lớn nhất về biến động điểm số trong mẫu dữ liệu. 
+   > *Lưu ý quan trọng:* Đây là **so sánh tương quan thống kê trong dự báo (predictive association)**, tuyệt đối không suy diễn quan hệ nhân quả (causality) hay cho rằng cồn "quyết định" chất lượng rượu.
+2. **Năng lực dự báo gia tăng của mô hình đa biến (Incremental Predictive Power):**
+   Khi đưa thêm 10 thuộc tính hóa lý vào mô hình, hệ số $R^2$ tăng thêm **$16.76$ điểm phần trăm** (từ $23.56\%$ lên $40.32\%$), đồng thời MSE giảm **$21.92\%$**. 
+   > *Góc nhìn kinh tế lượng:* Vì giữa các đặc trưng có hiện tượng đa cộng tuyến (ví dụ: `alcohol` tương quan âm với `density` $r \approx -0.496$), ta không thể phân rã $16.76\%$ này thành đóng góp cộng dồn độc lập của từng biến. Con số $16.76$ điểm phần trăm phản ánh **giá trị gia tăng tổng thể** khi mô hình khai thác đồng thời cấu trúc đa biến của các hợp chất hóa lý (độ axit, sulfate, đường dư...).
+3. **Đánh giá về độ ổn định ngoài mẫu (Out-of-sample Generalization):**
+   Trên mô hình Baseline, Test MSE ($0.3900$) có giá trị xấp xỉ và thấp hơn nhẹ so với Train MSE ($0.4242$). Điều này cho thấy mô hình kiểm soát tốt sai số và không xuất hiện biểu hiện quá khớp nghiêm trọng (severe overfitting) trên tập kiểm thử này. Sự chênh lệch nhẹ này phản ánh biến thiên chọn mẫu ngẫu nhiên (sampling variability) của tập test 320 mẫu, không dùng để tuyên bố "chứng minh mô hình hoàn toàn không bị overfitting".
 
 ---
 
 ## 3. Chi tiết Slide 8: Visualization & Discussion (Chẩn đoán sai số trực quan)
 
-Slide 8 là slide quan trọng nhất về mặt khoa học dữ liệu và toán học ứng dụng, làm sáng tỏ cơ chế hoạt động của mô hình thông qua 2 biểu đồ chính và 2 biểu đồ phân tích bổ trợ.
+Slide 8 làm sáng tỏ bản chất toán học của mô hình OLS thông qua 4 biểu đồ chẩn đoán trực quan chuẩn 300 DPI:
 
 ### 3.1. Phân tích Biểu đồ 1: Actual vs. Predicted (`reports/baseline_actual_vs_predicted.png`)
-- **Đặc điểm hình ảnh trực quan:**
-  - Dữ liệu tạo thành **các dải sọc ngang song song** tại các mức điểm thực tế $y \in \{3, 4, 5, 6, 7, 8\}$.
-  - Toàn bộ giá trị dự đoán $\hat{y}$ chỉ dao động trong khoảng hẹp **$[4.71, 6.80]$**, hoàn toàn không có điểm nào được dự đoán $< 4.7$ hoặc $> 6.8$.
-- **Bản chất toán học & Giải thích học thuật:**
-  1. *Bản chất nhãn rời rạc (Discrete Target):* Điểm chất lượng thực tế là số nguyên rời rạc ($y \in \mathbb{N}$), trong khi mô hình hồi quy tuyến tính xuất ra số thực liên tục ($\hat{y} \in \mathbb{R}$). Do đó, các điểm kiểm thử bắt buộc phải xếp thành các hàng ngang ứng với từng giá trị nguyên của $y$.
-  2. *Hiện tượng Hồi quy về giá trị trung bình (Regression toward the mean):* 
-     - Nghiệm giải tích Least Squares tối ưu hàm mất mát MSE: $\min_{\mathbf{w}, b} \frac{1}{n}\sum_{i=1}^{n}(y_i - \hat{y}_i)^2$.
-     - Vì hàm MSE phạt **bình phương** độ lệch ($e_i^2$), việc dự đoán một giá trị cực đoan (như 3 hoặc 8) nếu bị sai lệch sẽ gây ra một khoản phạt tổn thất cực lớn.
-     - Để giảm thiểu tổng mất mát trên toàn tập dữ liệu, siêu phẳng hồi quy co cụm các dự đoán về gần điểm trung bình mẫu ($\bar{y} \approx 5.68$).
-     - Hệ quả: Rượu dở (điểm 3, 4) bị **dự đoán cao lên** ($\hat{y} \approx 5.14 - 5.23$). Rượu hảo hạng (điểm 7, 8) bị **dự đoán thấp xuống** ($\hat{y} \approx 6.18 - 6.56$).
+- **Hiện tượng sọc ngang (Horizontal Bands):**
+  - Các điểm kiểm thử xếp thành các hàng ngang song song ứng với các mức điểm nguyên thực tế $y \in \{3, 4, 5, 6, 7, 8\}$, trong khi mô hình hồi quy tuyến tính OLS dự đoán trên miền số thực liên tục $\hat{y} \in \mathbb{R}$.
+- **Hiện tượng co về giá trị trung bình (Regression toward the mean):**
+  - Dải giá trị dự đoán của mô hình bị co cụm trong khoảng hẹp **$[4.7063, 6.8040]$**. Mô hình không đưa ra bất kỳ dự đoán nào $< 4.7$ hoặc $> 6.8$.
+  - *Cơ chế tối ưu hóa $L_2$:* Hàm mất mát $MSE = \frac{1}{n}\sum(y_i - \hat{y}_i)^2$ phạt theo bình phương sai số ($e_i^2$). Do đó, siêu phẳng OLS kéo các dự đoán về gần điểm trung bình mẫu ($\bar{y} \approx 5.68$) để hạn chế các khoản phạt tổn thất lớn ở vùng biên.
+  - *Hệ quả phân lớp:* Rượu chất lượng thấp ($y=3, 4$) bị **dự đoán cao hơn thực tế** ($\hat{y} \approx 5.14 - 5.23$, Mean Residual âm). Rượu hảo hạng ($y=7, 8$) bị **dự đoán thấp hơn thực tế** ($\hat{y} \approx 6.18 - 6.56$, Mean Residual dương).
 
 ### 3.2. Phân tích Biểu đồ 2: Residual Plot (`reports/baseline_residual_plot.png`)
-- **Đặc điểm hình ảnh trực quan:**
-  - Trục hoành là giá trị dự đoán $\hat{y}$, trục tung là phần dư $e = y - \hat{y}$.
-  - Đường xu hướng phần dư gần như nằm ngang với **độ dốc xấp xỉ 0** (Trendline Slope $= 0.10 \approx 0$).
-  - Các điểm phần dư phân tán tương đối đồng đều xung quanh đường chuẩn $e = 0$ trên toàn bộ dải dự đoán chính $[5.2, 6.2]$.
-- **Bản chất toán học & Kiểm chứng OLS:**
-  - *Tính trực giao (Orthogonality Condition):* Trong nghiệm Least Squares, phương trình chuẩn (Normal Equation) quy định:
-    $$\mathbf{X}^T \mathbf{e} = \mathbf{0} \implies \hat{\mathbf{y}}^T \mathbf{e} = (\mathbf{X}\mathbf{w})^T \mathbf{e} = \mathbf{w}^T (\mathbf{X}^T \mathbf{e}) = 0$$
-    Vì mô hình có hệ số chặn $b$, một cột của ma trận là vector $\mathbf{1}$, dẫn đến $\sum_{i=1}^n e_i = 0$. Do đó, trên tập huấn luyện, hiệp phương sai $\text{Cov}(\hat{y}, e) \equiv 0$ tuyệt đối.
-  - *Kiểm chứng trên Test Set:* Trên tập dữ liệu kiểm thử độc lập (320 mẫu chưa từng thấy), độ dốc của phần dư theo giá trị dự đoán chỉ là $0.0987 \approx 0.10$. Đường xu hướng gần như phẳng này là **bằng chứng thực nghiệm xác thực mô hình không bị rò rỉ xu hướng tuyến tính chưa khai phá** giữa dự đoán và sai số.
-  - *Tính đồng phương sai (Homoscedasticity):* Phần dư duy trì phương sai ổn định trong khoảng dự đoán tập trung $[5.2, 6.2]$, thỏa mãn tốt các giả định nền tảng của định lý Gauss-Markov trong phạm vi hoạt động chính của mô hình.
+- **Đặc điểm trực quan:** Trục hoành là giá trị dự đoán $\hat{y}$, trục tung là phần dư kiểm thử $e = y - \hat{y}$. Đường xu hướng có độ dốc mẫu: $\text{Slope} = \mathbf{+0.0987 \approx +0.10}$.
+- **Phân định rạch ròi giữa lý thuyết Train và chẩn đoán Test:**
+  1. *Tính trực giao OLS trên tập Train (Algebraic Identity):* Theo phương trình chuẩn OLS:
+     $$\mathbf{X}_{\text{train}}^T \mathbf{e}_{\text{train}} = \mathbf{0} \implies \hat{\mathbf{y}}_{\text{train}}^T \mathbf{e}_{\text{train}} = 0 \implies \text{Cov}(\hat{y}_{\text{train}}, e_{\text{train}}) \equiv 0$$
+     Đây là một đẳng thức đại số bắt buộc trên tập huấn luyện do cơ chế tìm nghiệm Least Squares.
+  2. *Chẩn đoán thực nghiệm ngoài mẫu trên tập Test (Empirical Diagnostic):* Trên tập test độc lập, các phần dư không bị ràng buộc toán học phải trực giao với $\hat{\mathbf{y}}$. Độ dốc mẫu $+0.0987 \approx +0.10$ là một **chỉ báo chẩn đoán thực nghiệm ngoài mẫu**, cho thấy phần dư kiểm thử chỉ xuất hiện độ lệch tuyến tính rất nhẹ theo giá trị dự đoán.
+  3. *Thực tế về giả định Gauss-Markov:* Trong dải dự đoán trung tâm $[5.2, 6.2]$, phần dư phân tán tương đối đồng đều quanh trục $e=0$. Tuy nhiên, trên toàn cục, do biến mục tiêu $y$ bị chặn trên và chặn dưới trong miền $[3, 8]$, phần dư ở vùng biên chịu ràng buộc giới hạn (boundary constraints), gây ra hiện tượng phương sai thay đổi có điều kiện (conditional heteroscedasticity) tại các mức điểm cực đoan.
 
-### 3.3. Phân tích Biểu đồ 3 & 4: Phân phối phần dư & Bóc tách theo phân lớp (`reports/error_by_quality_tier.png`)
+### 3.3. Phân tích Biểu đồ 3 & 4: Phân phối phần dư & Bóc tách sai số theo phân lớp (`reports/error_by_quality_tier.png`)
 - **Bảng số liệu phân tách theo từng mức điểm thực tế (Breakdown Table):**
 
-| Điểm chất lượng ($y$) | Số mẫu Test ($n$) | Tỷ lệ (%) | Điểm dự đoán TB ($\bar{\hat{y}}$) | Độ lệch trung bình (Bias: $y - \hat{y}$) | MAE | Nhận xét sai số |
+| Điểm chất lượng ($y$) | Số mẫu Test ($n$) | Tỷ lệ (%) | Điểm dự đoán TB ($\bar{\hat{y}}$) | Độ lệch trung bình (Bias: $y - \hat{y}$) | MAE | Nhận xét kinh tế lượng |
 | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| **3** | 1 | $0.31\%$ | 5.2339 | **$-2.2339$** | 2.2339 | Sai lệch rất lớn (Dự đoán rượu rất tệ thành rượu trung bình) |
-| **4** | 10 | $3.12\%$ | 5.1357 | **$-1.1357$** | 1.1357 | Đánh giá quá cao (Overestimation) |
+| **3** | 1 | $0.31\%$ | 5.2339 | **$-2.2339$** | 2.2339 | Đánh giá quá cao rượu kém (Overestimation) |
+| **4** | 10 | $3.12\%$ | 5.1357 | **$-1.1357$** | 1.1357 | Đánh giá quá cao rượu kém (Overestimation) |
 | **5** | 130 | $40.63\%$ | 5.3827 | **$-0.3827$** | **0.3970** | Dự đoán rất tốt, sai số nhỏ |
 | **6** | 132 | $41.25\%$ | 5.7567 | **$+0.2433$** | **0.4102** | Dự đoán rất tốt, sai số nhỏ |
 | **7** | 42 | $13.12\%$ | 6.1763 | **$+0.8237$** | 0.8237 | Đánh giá thấp hơn thực tế (Underestimation) |
-| **8** | 5 | $1.56\%$ | 6.5647 | **$+1.4353$** | 1.4353 | Sai lệch lớn (Dự đoán rượu hảo hạng thành rượu bình thường) |
+| **8** | 5 | $1.56\%$ | 6.5647 | **$+1.4353$** | 1.4353 | Đánh giá thấp hơn thực tế (Underestimation) |
 
-- **Kết luận:** Mô hình hoạt động cực kỳ chính xác tại vùng trung tâm (điểm 5 và 6, chiếm tới **$81.88\%$** mẫu) với $\text{MAE} \approx 0.40$, nhưng hoạt động kém tại các vùng biên ngoại vi (điểm 3, 4, 8) với $\text{MAE} > 1.1 - 2.2$.
+- **Kết luận:** Mô hình OLS dự đoán chính xác nhất ở vùng trung tâm (điểm 5 và 6 chiếm tới **$81.88\%$** mẫu) với $\text{MAE} \approx 0.40$, nhưng sai số tăng vọt ở các phân lớp hiếm ngoại vi (điểm 3, 4, 8) với $\text{MAE} > 1.1 - 2.2$.
 
 ---
 
-## 4. Chi tiết Slide 9: Limitations & Hướng phát triển (Hạn chế của mô hình)
+## 4. Chi tiết Slide 9: Limitations & Hướng phát triển (Hạn chế dưới góc nhìn Kinh tế lượng)
 
-Slide 9 thể hiện tư duy phản biện (Critical Thinking) của nhóm, chỉ ra các ranh giới kỹ thuật mà mô hình tuyến tính gặp phải:
+Slide 9 thể hiện tư duy phản biện khoa học (Critical Thinking) của nhóm, chỉ ra các ranh giới phương pháp luận của mô hình hồi quy tuyến tính cổ điển:
 
-### 4.1. Hạn chế về Bản chất Dữ liệu (Data Nature & Distribution)
-1. **Bài toán Thứ bậc rời rạc (Ordinal Nature) vs. Giả định biến liên tục (Continuous Assumption):**
-   - Điểm chất lượng rượu là biến thứ bậc ($3 < 4 < 5 < \dots < 8$).
-   - Hồi quy tuyến tính ngầm định khoảng cách toán học giữa các bước nhảy là đồng nhất: khoảng cách chất lượng từ điểm 3 lên 4 được coi là bằng đúng khoảng cách từ điểm 7 lên 8.
-   - Trên thực tế, sự khác biệt vị giác giữa một chai rượu "kém" (3) lên "chấp nhận được" (4) hoàn toàn khác với khoảng cách từ "ngon" (7) lên "xuất sắc" (8).
-2. **Sự mất cân bằng dữ liệu nghiêm trọng (Severe Class Imbalance):**
-   - Hai mức điểm 5 và 6 chiếm tới **$81.88\%$** tập kiểm thử và **$82.4\%$** toàn bộ dataset.
-   - Số mẫu điểm 3 chỉ có 1 mẫu trong test set ($0.31\%$), điểm 8 chỉ có 5 mẫu ($1.56\%$).
-   - Hệ quả: Thuật toán OLS ưu tiên tối ưu hóa hàm mất mát trên vùng tập trung đa số mẫu để đạt MSE toàn cục nhỏ nhất, dẫn đến việc "hy sinh" độ chính xác ở các lớp thiểu số.
-3. **Vấn đề bản ghi trùng lặp (Duplicate Records):**
-   - Dataset có 240 dòng trùng lặp ($15.01\%$). Dù được giữ nguyên theo thống nhất của nhóm để làm mốc baseline chuẩn, việc phân chia ngẫu nhiên có thể khiến một số mẫu trùng xuất hiện đồng thời ở cả train và test, gây nguy cơ rò rỉ thông tin nhẹ.
+### 4.1. Hạn chế về Bản chất Dữ liệu (Data Distribution & Structure)
+1. **Bản chất nhãn Thứ bậc rời rạc (Ordinal Nature) vs. Giả định biến liên tục (Continuous Linear Assumption):**
+   - Điểm chất lượng là biến thứ bậc rời rạc ($y \in \{3, 4, 5, 6, 7, 8\}$).
+   - Mô hình Linear Regression ngầm định khoảng cách toán học giữa các bước nhảy là đồng nhất: khoảng cách vị giác từ điểm 3 lên 4 được giả định bằng đúng từ 7 lên 8. Trên thực tế cảm quan con người, sự khác biệt giữa một chai rượu "hỏng/kém" lên "uống được" hoàn toàn khác với từ "ngon" lên "hảo hạng".
+2. **Mất cân bằng dữ liệu nghiêm trọng (Severe Class Imbalance):**
+   - Hai mức điểm 5 và 6 chiếm tới **$81.88\%$** tập kiểm thử và $82.4\%$ toàn bộ dataset.
+   - Nhóm điểm cực đoan 3 và 8 chỉ chiếm lần lượt $0.31\%$ và $1.56\%$.
+   - Thuật toán OLS tối thiểu hóa tổng bình phương phần dư trên toàn bộ mẫu, do đó siêu phẳng hồi quy ưu tiên tối ưu hóa cho vùng đa số mẫu để giảm tổng MSE, dẫn tới việc dự đoán kém ở các lớp thiểu số.
+3. **Dữ liệu quan sát (Observational Data) vs. Suy diễn can thiệp nhân quả (Causal Inference):**
+   - Dataset là dữ liệu quan sát thụ động, không phải thử nghiệm ngẫu nhiên có đối chứng (Randomized Controlled Trial).
+   - Các hệ số hồi quy $\hat{\beta}_j$ chỉ phản ánh **liên hệ tương quan từng phần (partial correlation)** có điều kiện, không phản ánh tác động can thiệp nhân quả (ví dụ: không thể kết luận tăng nhân tạo nồng độ cồn sẽ làm tăng điểm chất lượng rượu).
+4. **Vấn đề bản ghi trùng lặp (Duplicate Records):**
+   - Dataset chứa 240 dòng trùng lặp ($15.01\%$). Dù được giữ lại để làm mốc baseline chuẩn theo dataset UCI gốc, việc phân chia ngẫu nhiên có thể dẫn tới sự trùng lặp bản ghi giữa train và test, tiềm ẩn nguy cơ rò rỉ thông tin nhẹ.
 
 ### 4.2. Hạn chế về Thuật toán Hồi quy Tuyến tính (Algorithm Limitations)
 1. **Giả định quan hệ tuyến tính nghiêm ngặt (Strict Linearity):**
-   - Sinh hóa học trong rượu vang có nhiều hiệu ứng phi tuyến tính hoặc điểm bão hòa. Ví dụ: độ axit vừa phải giúp rượu tươi mới, nhưng quá nhiều axit sẽ làm rượu bị chua gắt; nồng độ cồn quá cao sẽ làm lấn át mùi hương tinh tế.
-   - Mô hình Linear Regression thuần túy không thể tự học được các tương tác phi tuyến tính (non-linear interactions) hay hiệu ứng biên giảm dần (diminishing marginal returns) nếu không có bước kỹ thuật tạo đặc trưng đa thức (Polynomial Features).
-2. **Hạn chế của hàm mất mát $L_2$ đối với ngoại lai:**
-   - Bình phương khoảng cách khiến mô hình rất nhạy cảm với các mẫu hiếm có giá trị hóa lý bất thường, làm dịch chuyển siêu phẳng hồi quy khỏi trạng thái tối ưu cho từng phân khúc rượu.
+   - Quá trình hóa sinh trong rượu vang có nhiều hiệu ứng phi tuyến tính và điểm bão hòa (ví dụ: độ axit vừa phải giúp cân bằng vị giác, nhưng quá nhiều axit sẽ làm rượu bị chua gắt; nồng độ cồn quá cao sẽ lấn át mùi hương tinh tế).
+   - Mô hình OLS thuần túy không thể tự học các tương tác phi tuyến tính (non-linear interactions) nếu không có bước kỹ thuật tạo đặc trưng đa thức (Polynomial Features).
 
-### 4.3. Đề xuất cải tiến học thuật (Future Work / Recommendations)
-1. **Chuyển đổi bài toán:** Sử dụng mô hình **Ordinal Logistic Regression** (Hồi quy logistic có thứ tự) hoặc bài toán **Multiclass Classification** để phản ánh đúng bản chất rời rạc của điểm chất lượng.
-2. **Kỹ thuật dữ liệu:** Áp dụng kỹ thuật tái lấy mẫu (Resampling) hoặc cân bằng trọng số (Class Weights / Sample Weights) để thuật toán chú ý hơn đến các nhóm điểm cực đoan (3, 4, 8).
-3. **Mô hình phi tuyến:** Thử nghiệm Ridge/Lasso Regression (có chuẩn hóa $L_1/L_2$), Polynomial Regression hoặc các thuật toán Tree-based (Random Forest, Gradient Boosting) để nắm bắt quan hệ phi tuyến.
+### 4.3. Đề xuất cải tiến học thuật (Future Recommendations)
+1. **Chuyển đổi bài toán:** Sử dụng mô hình **Ordinal Logistic Regression** (Hồi quy logistic có thứ tự) để phản ánh đúng bản chất rời rạc thứ bậc của biến mục tiêu.
+2. **Kỹ thuật xử lý mất cân bằng:** Áp dụng kỹ thuật cân bằng trọng số (Sample Weights / Cost-sensitive learning) để phạt nặng sai số ở các phân lớp hiếm (3, 4, 8).
+3. **Mô hình phi tuyến:** Thử nghiệm Ridge/Lasso Regression (có chuẩn hóa tham số để kiểm soát đa cộng tuyến), Polynomial Features hoặc các thuật toán Tree-based (Random Forest, Gradient Boosting) để nắm bắt các quan hệ phi tuyến tính.
 
 ---
 
@@ -134,14 +128,14 @@ Slide 9 thể hiện tư duy phản biện (Critical Thinking) của nhóm, ch�
 +----------------------------------------------------------------------------------------------------+
 | SLIDE 7: EXPERIMENTAL RESULTS — BASELINE (11 FEATURES) VS. ALCOHOL ONLY (1 FEATURE)               |
 +-------------------------------------------------+--------------------------------------------------+
-| CỘT TRÁI: BẢNG SỐ LIỆU SO SÁNH TRỰC DIỆN        | CỘT PHẢI: PHÂN TÍCH HỌC THUẬT & ĐỘNG LỰC TOÁN HỌC|
-| (Nhúng bảng số liệu 5 chỉ số MSE, RMSE, MAE,   | • Sức mạnh của Alcohol:                          |
-|  R2, Inference Time)                            |   - Chiếm 58.4% năng lực giải thích toàn mô hình |
-|                                                 |   - R2 = 0.2356 (đơn biến) vs. 0.4032 (11 biến)  |
-| HỘP NỔI BẬT (HIGHLIGHT BOX):                   | • Giá trị của 10 thuộc tính còn lại:             |
-| Baseline: R2 = 40.32% | MSE = 0.3900            |   - Giảm 21.9% MSE, bổ sung +16.76% R2           |
-| Alcohol : R2 = 23.56% | MSE = 0.4995            |   - Chất lượng rượu là bài toán hóa học đa chiều |
-| Δ R2    : +16.76%     | Δ MSE: -21.9%           | • Khả năng tổng quát hóa: Test MSE < Train MSE    |
+| CỘT TRÁI: BẢNG SỐ LIỆU SO SÁNH TRỰC DIỆN        | CỘT PHẢI: PHÂN TÍCH KINH TẾ LƯỢNG & ĐỘNG LỰC TOÁN|
+| (Nhúng bảng số liệu 5 chỉ số MSE, RMSE, MAE,   | • So sánh tương quan của Alcohol:                |
+|  R2, Inference Time kèm ghi chú benchmark)      |   - Đạt 58.44% mức R2 của mô hình 11 biến        |
+|                                                 |   - R2 = 0.2356 (1 biến) vs. 0.4032 (11 biến)    |
+| HỘP NỔI BẬT (HIGHLIGHT BOX):                   | • Năng lực dự báo gia tăng của 11 biến:          |
+| Baseline: R2 = 40.32% | MSE = 0.3900            |   - Giảm 21.92% MSE, R2 tăng +16.76 điểm %       |
+| Alcohol : R2 = 23.56% | MSE = 0.4995            |   - Đa cộng tuyến khiến R2 không thể phân rã cộng|
+| Δ R2    : +16.76% pts | Δ MSE: -21.92%          | • Độ ổn định ngoài mẫu: Test MSE ~ Train MSE     |
 +-------------------------------------------------+--------------------------------------------------+
 
 +----------------------------------------------------------------------------------------------------+
@@ -150,24 +144,25 @@ Slide 9 thể hiện tư duy phản biện (Critical Thinking) của nhóm, ch�
 | HÌNH TRÁI: Actual vs. Predicted Quality         | HÌNH PHẢI: Residual Plot (Error Diagnostics)     |
 | (File: reports/baseline_actual_vs_predicted.png)| (File: reports/baseline_residual_plot.png)       |
 +-------------------------------------------------+--------------------------------------------------+
-| 3 ĐIỂM NHẤN PHÂN TÍCH TOÁN HỌC:                                                                    |
+| 3 ĐIỂM NHẤN PHÂN TÍCH TOÁN HỌC & KINH TẾ LƯỢNG:                                                    |
 | 1. Hiện tượng sọc ngang: Do y là số nguyên rời rạc (3-8) trong khi y_hat là số thực liên tục.      |
-| 2. Hồi quy về trung bình (Regression to mean): Dự đoán bị co cụm trong dải [4.71, 6.80] do tối ưu  |
-|    hàm mất mát MSE (L2 norm) nhằm tránh phạt nặng sai số bình phương ở vùng biên.                 |
-| 3. Tính trực giao OLS & Đồng phương sai: Trendline phẳng (Slope ≈ 0.10), phần dư phân tán đều quanh 0. |
+| 2. Hồi quy về trung bình (Regression to mean): Dự đoán bị co cụm trong dải [4.71, 6.80] do hàm mất |
+|    mát L2 phạt bình phương sai số ở các vùng biên cực đoan.                                        |
+| 3. Chẩn đoán phần dư ngoài mẫu: Trendline thực nghiệm phẳng (Slope ≈ +0.10), phần dư phân tán      |
+|    tương đối đều ở dải trung tâm, nhưng có phương sai thay đổi có điều kiện ở các mức điểm biên.   |
 +----------------------------------------------------------------------------------------------------+
 
 +----------------------------------------------------------------------------------------------------+
 | SLIDE 9: LIMITATIONS & RECOMMENDATIONS                                                             |
 +-------------------------------------------------+--------------------------------------------------+
-| CỘT TRÁI: CÁC GIỚI HẠN KỸ THUẬT CỐT LÕI         | CỘT PHẢI: BẰNG CHỨNG THỰC NGHIỆM & ĐỀ XUẤT       |
+| CỘT TRÁI: GIỚI HẠN PHƯƠNG PHÁP LUẬN & DỮ LIỆU   | CỘT PHẢI: BẰNG CHỨNG THỰC NGHIỆM & HƯỚNG PHÁT TRIỂN|
 | 1. Bản chất nhãn Ordinal:                       | • Bằng chứng mất cân bằng (Imbalance):           |
-|    - Xem thứ bậc như liên tục, ngầm định các     |   - 81.9% mẫu tập trung ở điểm 5 & 6 (MAE ~ 0.40)|
-|      khoảng cách vị giác đều bằng nhau.          |   - Điểm 3, 4, 8 chỉ chiếm 5% (MAE > 1.1 - 2.2)  |
-| 2. Mất cân bằng lớp trầm trọng (Class Imbalance)| • Bằng chứng phi tuyến: Tương tác hóa học phức tạp|
-| 3. Giả định quan hệ tuyến tính thuần túy        | • Hướng phát triển:                              |
-|    - Bỏ qua các tương tác phi tuyến và bão hòa. |   - Ordinal Logistic Regression / Multiclass     |
-| 4. 240 dòng dữ liệu trùng lặp trong bộ dữ liệu  |   - Polynomial Features & Mô hình Tree-based     |
+|    - Giả định khoảng cách vị giác đều nhau.     |   - 81.88% mẫu tập trung ở điểm 5 & 6 (MAE ~ 0.40|
+| 2. Mất cân bằng lớp nghiêm trọng (Imbalance)    |   - Điểm 3, 4, 8 chỉ chiếm ~5% (MAE > 1.1 - 2.2) |
+| 3. Dữ liệu quan sát vs Suy diễn nhân quả        | • Bằng chứng phi tuyến: Tương tác hóa học phức tạp|
+|    - Tương quan từng phần, không phải can thiệp.| • Hướng phát triển:                              |
+| 4. Giả định tuyến tính thuần túy                |   - Ordinal Logistic Regression                  |
+| 5. 240 dòng trùng lặp trong dữ liệu gốc         |   - Cost-sensitive learning & Tree-based models  |
 +-------------------------------------------------+--------------------------------------------------+
 ```
 
@@ -176,42 +171,42 @@ Slide 9 thể hiện tư duy phản biện (Critical Thinking) của nhóm, ch�
 ## 6. Kịch bản thuyết trình mẫu dành cho Thư (Speech Transcript)
 
 > **Lời mở đầu & Tiếp nối từ Khuê (Slide 6):**  
-> *"Cảm ơn Khuê đã trình bày quy trình huấn luyện và kết quả chuẩn của mô hình Baseline. Tiếp theo, em xin đại diện nhóm trình bày phần Thực nghiệm mở rộng, Phân tích sai số và các Hạn chế cốt lõi của mô hình trên các Slide 7, 8 và 9."*
+> *"Cảm ơn Khuê đã trình bày quy trình huấn luyện và kết quả chuẩn của mô hình Baseline. Tiếp theo, em xin đại diện nhóm trình bày phần Thực nghiệm so sánh, Chẩn đoán sai số và Hạn chế của mô hình trên các Slide 7, 8 và 9 dưới góc nhìn phương pháp luận và kiểm định toán học."*
 
-### Kịch bản Slide 7 (Thực nghiệm so sánh):
-*"Thưa thầy cô và các bạn, bước vào Slide 7, nhóm đặt ra một câu hỏi thực nghiệm tự nhiên: Trong phân tích EDA của bạn Thảo, nồng độ cồn (`alcohol`) là biến có tương quan mạnh nhất với điểm chất lượng. Vậy nếu nhóm chỉ sử dụng duy nhất biến này để xây dựng mô hình hồi quy đơn biến, kết quả sẽ ra sao?*
+### Kịch bản Slide 7 (Thực nghiệm so sánh năng lực dự báo):
+*"Thưa thầy cô và các bạn, bước vào Slide 7, nhóm đặt ra một câu hỏi thực nghiệm tự nhiên: Trong phân tích EDA của bạn Thảo, nồng độ cồn (`alcohol`) là thuộc tính có tương quan tuyến tính đơn biến mạnh nhất với chất lượng rượu ($r \approx +0.48$). Vậy nếu nhóm xây dựng một mô hình hồi quy đơn biến chỉ dựa vào nồng độ cồn, năng lực dự báo sẽ ra sao so với mô hình 11 biến?*
 
-*Nhìn vào bảng số liệu trên màn hình: Một mình đặc trưng `alcohol` đã đem lại hệ số $R^2 = 23.56\%$. Khi so sánh với mô hình Baseline dùng cả 11 đặc trưng có $R^2 = 40.32\%$, ta nhận thấy nồng độ cồn giải thích tới hơn $58\%$ năng lực dự báo của toàn bộ mô hình! Tuy nhiên, việc bổ sung 10 đặc trưng hóa học còn lại vẫn vô cùng giá trị: nó giúp giảm tới $21.9\%$ sai số bình phương MSE và đẩy $R^2$ tăng thêm gần $17\%$. Điều này khẳng định chất lượng rượu vang là một trải nghiệm cảm quan đa chiều và phụ thuộc vào sự cân bằng giữa nhiều yếu tố hóa lý."*
+*Nhìn vào bảng số liệu trên màn hình: Một mình đặc trưng `alcohol` đã đem lại hệ số $R^2 = 23.56\%$ trên tập test độc lập, tương đương hơn $58\%$ mức $R^2$ của mô hình 11 biến. Tuy nhiên, nhóm nhấn mạnh đây là **so sánh tương quan dự báo tuyến tính**, không phải quan hệ nhân quả. Khi mở rộng sang mô hình đa biến kết hợp đủ 11 thuộc tính hóa lý, hệ số $R^2$ tăng thêm $16.76$ điểm phần trăm lên mức $40.32\%$ và sai số MSE giảm tới $21.92\%$. Do giữa các thuộc tính hóa học tồn tại hiện tượng đa cộng tuyến, mức tăng $16.76$ điểm phần trăm này phản ánh giá trị gia tăng tổng thể của hệ thống hóa lý đa chiều chứ không thể phân rã cộng dồn độc lập. Cuối cùng, mức sai số giữa Train MSE ($0.4242$) và Test MSE ($0.3900$) là rất nhỏ, cho thấy mô hình kiểm soát tốt sai số kiểm thử và không có biểu hiện quá khớp nghiêm trọng."*
 
-### Kịch bản Slide 8 (Phân tích sai số trực quan):
-*"Chuyển sang Slide 8, đây là phần chẩn đoán sai số trực quan để hiểu sâu sắc bản chất toán học của mô hình:*
+### Kịch bản Slide 8 (Chẩn đoán sai số trực quan):
+*"Chuyển sang Slide 8, đây là phần chẩn đoán sai số trực quan để hiểu sâu sắc cơ chế hoạt động của nghiệm OLS:*
 
-*Ở biểu đồ bên trái — Actual vs. Predicted: Ta lập tức quan sát thấy hai hiện tượng thú vị. Thứ nhất là các dải điểm xếp thành hàng ngang, điều này rất tự nhiên vì điểm đánh giá thực tế của chuyên gia là số nguyên từ 3 đến 8, trong khi mô hình hồi quy xuất ra số thực liên tục. Thứ hai, toàn bộ dự đoán chỉ dao động trong dải hẹp từ 4.71 đến 6.80. Mô hình không bao giờ dám dự đoán một chai rượu đạt điểm 3 hay điểm 8.*
+*Ở biểu đồ bên trái — Actual vs. Predicted: Ta quan sát thấy các dải điểm xếp thành hàng ngang do biến mục tiêu thực tế là số nguyên rời rạc từ 3 đến 8, trong khi mô hình hồi quy dự đoán trên miền số thực liên tục. Đáng chú ý, toàn bộ dự đoán chỉ dao động trong dải hẹp từ 4.71 đến 6.80. Hiện tượng này được gọi là **'Hồi quy về giá trị trung bình' (Regression toward the mean)**. Do hàm mất mát MSE phạt theo bình phương sai số, siêu phẳng OLS kéo các dự đoán về gần điểm trung bình mẫu quanh 5.68 để hạn chế các khoản phạt tổn thất lớn ở vùng biên.*
 
-*Nguyên nhân toán học nằm ở hiện tượng 'Hồi quy về giá trị trung bình' (Regression toward the mean) khi tối ưu hóa hàm mất mát MSE. Vì MSE phạt bình phương sai số, nên siêu phẳng Least Squares chấp nhận kéo dự đoán về vùng mật độ tập trung đông nhất quanh điểm 5.6 để hạn chế rủi ro sai số lớn. Trên biểu đồ phần dư bên phải, đường xu hướng gần như nằm ngang phẳng (Slope = 0.10 ≈ 0) và phân tán đều quanh trục 0, là bằng chứng thực nghiệm xác thực tính trực giao Cov(ŷ, e) ≈ 0 và tính đồng phương sai (Homoscedasticity) của nghiệm OLS trên dữ liệu kiểm thử. Sự thiên lệch có hệ thống (rượu dở bị đoán tăng điểm, rượu hảo hạng bị đoán giảm điểm) được bóc tách rõ nét khi ta nhóm sai số theo từng mức điểm thực tế."*
+*Chuyển sang biểu đồ phần dư bên phải: Về mặt giải tích, tính trực giao OLS $\text{Cov}(\hat{y}, e) = 0$ là đẳng thức toán học trên tập huấn luyện. Trên tập kiểm thử độc lập 320 mẫu này, đường xu hướng thực nghiệm có độ dốc rất nhỏ (Slope $\approx +0.10$), cho thấy phần dư kiểm thử chỉ có độ lệch tuyến tính rất nhẹ theo giá trị dự đoán. Khi bóc tách sai số theo từng phân lớp điểm thực tế ở bảng bên dưới, ta thấy rõ: ở hai phân lớp đa số là 5 và 6 (chiếm gần $82\%$ mẫu test), sai số tuyệt đối MAE chỉ khoảng $0.40$ điểm; nhưng ở các phân lớp hiếm như 3, 4 hay 8, sai số MAE tăng vọt lên từ $1.1$ đến hơn $2.2$ điểm."*
 
 ### Kịch bản Slide 9 (Hạn chế & Hướng phát triển):
-*"Từ những phân tích thực nghiệm trên, ở Slide 9, nhóm thẳng thắn nhìn nhận 3 hạn chế cốt lõi của mô hình:*
+*"Từ những phân tích thực nghiệm trên, ở Slide 9, nhóm thẳng thắn chỉ ra các giới hạn phương pháp luận của mô hình:*
 
-*Thứ nhất, về mặt toán học, hồi quy tuyến tính giả định biến mục tiêu liên tục và khoảng cách giữa các bậc là đều nhau, trong khi điểm rượu là thang đo thứ bậc (ordinal) dựa trên cảm quan chủ quan của con người. Thứ hai, dữ liệu bị mất cân bằng trầm trọng: hơn 81% mẫu thử nghiệm dồn vào điểm 5 và 6, khiến mô hình bị 'thiên vị' và học rất kém ở các phân lớp hiếm như 3 hay 8. Thứ ba, quan hệ giữa nồng độ hóa chất và vị giác vốn mang tính phi tuyến tính cao.*
+*Thứ nhất, hồi quy tuyến tính giả định biến mục tiêu liên tục và khoảng cách giữa các bước nhảy là đồng nhất, trong khi điểm rượu là biến thứ bậc (ordinal) dựa trên cảm quan chủ quan của con người. Thứ hai, sự mất cân bằng dữ liệu nghiêm trọng — với gần $82\%$ mẫu tập trung ở điểm 5 và 6 — khiến thuật toán OLS ưu tiên tối ưu hóa vùng trung tâm để giảm tổng sai số toàn cục, dẫn tới dự đoán kém ở các phân lớp hiếm. Thứ ba, đây là dữ liệu quan sát (observational data), các hệ số hồi quy chỉ phản ánh liên hệ tương quan tuyến tính từng phần chứ không chứng minh tác động can thiệp nhân quả. Thứ tư, các phản ứng hóa sinh trong rượu vang vốn mang tính phi tuyến tính cao.*
 
-*Vì vậy, trong tương lai, nhóm đề xuất chuyển sang mô hình Ordinal Logistic Regression hoặc sử dụng các thuật toán phi tuyến tính như Random Forest, Gradient Boosting để khắc phục triệt để các hạn chế này. Sau đây, xin mời bạn Quân tổng kết lại dự án và điều phối phần Q&A."*
+*Vì vậy, trong tương lai, nhóm đề xuất chuyển đổi bài toán sang Ordinal Logistic Regression, áp dụng kỹ thuật cân bằng trọng số hoặc sử dụng các mô hình Tree-based phi tuyến tính như Random Forest, Gradient Boosting để cải thiện độ chính xác. Sau đây, xin mời bạn Quân tổng kết lại dự án và điều phối phần Q&A."*
 
 ---
 
 ## 7. Bộ câu hỏi & câu trả lời phản biện (Q&A Defense) dành cho Giảng viên MAI391
 
-**Câu hỏi 1 của Giảng viên:** *Trên biểu đồ Residual Plot (phần dư theo giá trị dự đoán ŷ), ta thấy đường trendline có độ dốc xấp xỉ 0 (Slope ≈ 0.10) và phân tán đều quanh trục 0. Điều này mang ý nghĩa toán học gì trong OLS?*
+**Câu hỏi 1 của Giảng viên:** *Độ dốc của đường xu hướng trên biểu đồ Residual Plot ở tập test là $+0.0987 \approx +0.10$. Con số này có chứng minh được phần dư trực giao với giá trị dự đoán hay không?*
 > **Gợi ý trả lời cho Thư:**  
-> *"Dạ thưa thầy/cô, theo phương trình chuẩn Normal Equation của OLS, vector phần dư $\mathbf{e}$ về mặt toán học trực giao với không gian các cột của ma trận đặc trưng $X$, tức $\mathbf{X}^T \mathbf{e} = \mathbf{0}$. Do $\hat{\mathbf{y}} = \mathbf{X}\mathbf{w}$, ta có $(\hat{\mathbf{y}})^T \mathbf{e} = 0$, nghĩa là trên tập train hiệp phương sai $\text{Cov}(\hat{y}, e) \equiv 0$ tuyệt đối. Trên tập kiểm thử độc lập 320 mẫu, việc đường xu hướng duy trì độ dốc phẳng (Slope = 0.10 ≈ 0) và phần dư phân tán đều xung quanh trục $e=0$ trên dải dự đoán chính [5.2, 6.2] là bằng chứng thực nghiệm xác nhận mô hình đã trích xuất hết thông tin tương quan tuyến tính và thỏa mãn tốt giả định đồng phương sai (Homoscedasticity) của định lý Gauss-Markov."*
+> *"Dạ thưa thầy/cô, về mặt giải tích toán học, tính trực giao $\mathbf{X}^T \mathbf{e} = \mathbf{0} \implies \hat{\mathbf{y}}^T \mathbf{e} = 0 \implies \text{Cov}(\hat{y}, e) \equiv 0$ là một đẳng thức đại số bắt buộc trên tập huấn luyện (training set identity) do cơ chế giải phương trình chuẩn OLS. Tuy nhiên, trên tập kiểm thử ngoài mẫu (out-of-sample test set), phần dư không bị ràng buộc toán học phải trực giao với giá trị dự đoán. Con số độ dốc thực nghiệm $+0.0987 \approx +0.10$ trên tập test chỉ là một chỉ báo chẩn đoán thực nghiệm (empirical diagnostic), cho thấy phần dư kiểm thử chỉ xuất hiện độ lệch tuyến tính rất nhẹ theo giá trị dự đoán trên mẫu dữ liệu cụ thể này, chứ không phải là một chứng minh toán học cho tính trực giao ngoài mẫu."*
 
-**Câu hỏi 2 của Giảng viên:** *Mô hình đạt $R^2 = 40.32\%$. Con số này là cao hay thấp, và tại sao nó lại có giá trị thực tiễn trong môn học?*
+**Câu hỏi 2 của Giảng viên:** *Mô hình đơn biến alcohol đạt $R^2 = 23.56\%$ và mô hình 11 biến đạt $R^2 = 40.32\%$. Ta có thể nói 10 biến còn lại đóng góp độc lập $16.76\%$ vào $R^2$ hay không?*
 > **Gợi ý trả lời cho Thư:**  
-> *"Dạ thưa thầy/cô, nếu so với các bài toán mô phỏng vật lý thuần túy, $R^2 = 40.32\%$ có vẻ khiêm tốn. Tuy nhiên, trong bài toán đánh giá cảm quan thực phẩm và con người, $40.32\%$ là một con số rất có ý nghĩa. Nghiên cứu gốc của Cortez et al. (2009) khi công bố bộ dữ liệu này cũng chỉ ra rằng các mô hình tuyến tính đạt sai số quanh mức này vì cảm nhận hương vị con người có tính chủ quan cao và chịu ảnh hưởng của các hợp chất vi lượng chưa được đo đạc trong 11 chỉ số hóa lý. Việc đạt $R^2 \approx 40\%$ trên tập Test mà không bị overfitting chứng minh Multiple Linear Regression đã nắm bắt được cấu trúc tuyến tính chính yếu của bộ dữ liệu."*
+> *"Dạ thưa thầy/cô, về mặt kinh tế lượng, ta không thể phân rã $16.76\%$ đó thành đóng góp cộng dồn độc lập của 10 biến còn lại. Lý do là vì các thuộc tính hóa lý trong rượu vang có mối tương quan lẫn nhau (hiện tượng đa cộng tuyến — ví dụ `alcohol` tương quan âm với `density` $r \approx -0.496$). Khi các biến phụ thuộc tuyến tính vào nhau, không gian cột của chúng bị chồng lấn một phần, nên $R^2$ không có tính chất cộng dồn trực giao. Con số $+16.76$ điểm phần trăm phản ánh giá trị gia tăng của mô hình đa biến nói chung trong việc giải thích phương sai ngoài mẫu so với mô hình đơn biến."*
 
-**Câu hỏi 3 của Giảng viên:** *Tại sao nhóm không loại bỏ 240 dòng dữ liệu trùng lặp ngay từ đầu?*
+**Câu hỏi 3 của Giảng viên:** *Tại sao mô hình OLS lại bị co cụm dự đoán trong dải [4.71, 6.80] và không dự đoán được các điểm cực đoan 3 hay 8?*
 > **Gợi ý trả lời cho Thư:**  
-> *"Dạ thưa thầy/cô, nhóm đã kiểm tra và ghi nhận chính xác 240 dòng trùng lặp ($15\%$). Tuy nhiên, trong sản xuất rượu vang, các mẻ rượu từ cùng một thùng ủ hoặc cùng một quy trình đo lường hoàn toàn có thể cho ra các thông số hóa lý y hệt nhau và nhận cùng mức đánh giá cảm quan. Để giữ tính nguyên bản của tập dữ liệu UCI và đảm bảo tính nhất quán đối chuẩn giữa 6 thành viên, nhóm quyết định giữ lại các dòng này cho mô hình Baseline, đồng thời thảo luận thẳng thắn về nguy cơ rò rỉ thông tin nhẹ như một trong những hạn chế của dự án ở Slide 9."*
+> *"Dạ thưa thầy/cô, nguyên nhân cốt lõi bắt nguồn từ hàm mất mát $MSE = \frac{1}{n}\sum(y_i - \hat{y}_i)^2$ ($L_2$ loss) kết hợp với sự mất cân bằng dữ liệu (gần $82\%$ mẫu tập trung ở điểm 5 và 6). Hàm $L_2$ phạt sai số theo hàm bậc hai ($e_i^2$), nên việc dự đoán một giá trị cực đoan như 3 hay 8 nếu bị sai lệch sẽ gây ra tổn thất cực lớn. Để giảm thiểu tổng tổn thất trên toàn bộ tập dữ liệu, siêu phẳng OLS kéo các dự đoán co cụm về gần giá trị trung bình mẫu ($\approx 5.68$). Đây chính là hiện tượng hồi quy về giá trị trung bình (Regression toward the mean) điển hình trong thống kê."*
 
 ---
 
@@ -219,13 +214,14 @@ Slide 9 thể hiện tư duy phản biện (Critical Thinking) của nhóm, ch�
 
 | STT | Tên file / Sản phẩm | Đường dẫn | Mô tả chi tiết | Trạng thái |
 | :---: | :--- | :--- | :--- | :---: |
-| 1 | **Notebook thực nghiệm hoàn chỉnh** | [`notebooks/Thu_Experiments.ipynb`](../notebooks/Thu_Experiments.ipynb) | Chứa đầy đủ code, markdown giải thích toán học, render sẵn toàn bộ biểu đồ và output bảng số liệu | ✅ Đã hoàn tất |
-| 2 | **Bảng so sánh 2 mô hình** | [`reports/model_comparison.csv`](model_comparison.csv) | So sánh MSE, RMSE, MAE, $R^2$ giữa Baseline 11 biến và Alcohol 1 biến | ✅ Đã hoàn tất |
-| 3 | **Bảng số liệu đối chuẩn Slide 7** | [`reports/alcohol_experiment_metrics.csv`](alcohol_experiment_metrics.csv) | Số liệu chênh lệch phục vụ trực tiếp cho Slide 7 | ✅ Đã hoàn tất |
-| 4 | **Bảng dự đoán mô hình Alcohol** | [`reports/alcohol_test_predictions.csv`](alcohol_test_predictions.csv) | Dữ liệu dự đoán và phần dư của mô hình 1 biến | ✅ Đã hoàn tất |
-| 5 | **Bảng phân tích sai số theo phân lớp** | [`reports/error_by_quality_metrics.csv`](error_by_quality_metrics.csv) | Chi tiết số lượng mẫu, MAE, Bias theo từng mức điểm từ 3 đến 8 | ✅ Đã hoàn tất |
-| 6 | **Biểu đồ Actual vs. Predicted** | [`reports/baseline_actual_vs_predicted.png`](baseline_actual_vs_predicted.png) | Biểu đồ 300 DPI có đường $y=\hat{y}$, chú thích sọc ngang và co về trung bình | ✅ Đã hoàn tất |
-| 7 | **Biểu đồ Residual Plot** | [`reports/baseline_residual_plot.png`](baseline_residual_plot.png) | Biểu đồ 300 DPI thể hiện đường $e=0$, trendline dốc âm và phân tích phương sai | ✅ Đã hoàn tất |
-| 8 | **Biểu đồ Phân phối phần dư** | [`reports/baseline_residual_distribution.png`](baseline_residual_distribution.png) | Histogram và đường khớp chuẩn kiểm tra giả định Gauss-Markov | ✅ Đã hoàn tất |
-| 9 | **Biểu đồ Sai số theo phân lớp** | [`reports/error_by_quality_tier.png`](error_by_quality_tier.png) | Biểu đồ kép thể hiện sự mất cân bằng dữ liệu và sai số vượt trội ở vùng biên | ✅ Đã hoàn tất |
-| 10 | **Tài liệu bàn giao Slide 7, 8, 9** | [`reports/slide7_8_9_experiments_and_analysis.md`](slide7_8_9_experiments_and_analysis.md) | Tài liệu hướng dẫn ráp slide, kịch bản thuyết trình và bộ câu hỏi phản biện | ✅ Đã hoàn tất |
+| 1 | **Notebook thực nghiệm hoàn chỉnh** | [`notebooks/Thu_Experiments.ipynb`](../notebooks/Thu_Experiments.ipynb) | Tự thân thực thi 100% (Restart & Run All clean), có công thức toán và đồ thị chuẩn | ✅ Đã kiểm định |
+| 2 | **Bảng so sánh 2 mô hình** | [`reports/model_comparison.csv`](model_comparison.csv) | So sánh MSE, RMSE, MAE, $R^2$ giữa Baseline 11 biến và Alcohol 1 biến | ✅ Đã kiểm định |
+| 3 | **Bảng số liệu đối chuẩn Slide 7** | [`reports/alcohol_experiment_metrics.csv`](alcohol_experiment_metrics.csv) | Số liệu chênh lệch phục vụ trực tiếp cho Slide 7 | ✅ Đã kiểm định |
+| 4 | **Bảng dự đoán mô hình Alcohol** | [`reports/alcohol_test_predictions.csv`](alcohol_test_predictions.csv) | Dữ liệu dự đoán và phần dư của mô hình 1 biến | ✅ Đã kiểm định |
+| 5 | **Bảng phân tích sai số theo phân lớp** | [`reports/error_by_quality_metrics.csv`](error_by_quality_metrics.csv) | Chi tiết số lượng mẫu, MAE, Bias theo từng mức điểm từ 3 đến 8 | ✅ Đã kiểm định |
+| 6 | **Biểu đồ Actual vs. Predicted** | [`reports/baseline_actual_vs_predicted.png`](baseline_actual_vs_predicted.png) | Biểu đồ 300 DPI có đường $y=\hat{y}$, chú thích sọc ngang và co về trung bình | ✅ Đã kiểm định |
+| 7 | **Biểu đồ Residual Plot** | [`reports/baseline_residual_plot.png`](baseline_residual_plot.png) | Biểu đồ 300 DPI thể hiện đường $e=0$, trendline thực nghiệm (Slope = +0.10) và phân tích phương sai | ✅ Đã kiểm định |
+| 8 | **Biểu đồ Phân phối phần dư** | [`reports/baseline_residual_distribution.png`](baseline_residual_distribution.png) | Histogram và đường khớp chuẩn kiểm tra giả định Gauss-Markov | ✅ Đã kiểm định |
+| 9 | **Biểu đồ Sai số theo phân lớp** | [`reports/error_by_quality_tier.png`](error_by_quality_tier.png) | Biểu đồ kép thể hiện sự mất cân bằng dữ liệu và sai số vượt trội ở vùng biên | ✅ Đã kiểm định |
+| 10 | **Tài liệu bàn giao Slide 7, 8, 9** | [`reports/slide7_8_9_experiments_and_analysis.md`](slide7_8_9_experiments_and_analysis.md) | Tài liệu hướng dẫn ráp slide, kịch bản thuyết trình và bộ câu hỏi phản biện chuẩn kinh tế lượng | ✅ Đã kiểm định |
+| 11 | **Bộ kiểm thử tự động toàn diện** | [`test_thu_deliverables.py`](../test_thu_deliverables.py) | Bộ 50/50 tests kiểm định cả 2 lớp Kỹ thuật & Học thuật, bao gồm Restart & Run All check | ✅ Đã kiểm định |

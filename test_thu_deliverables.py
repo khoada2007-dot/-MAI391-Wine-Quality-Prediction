@@ -100,22 +100,37 @@ test_assert(len(code_cells) >= 4, f"Notebook có {len(code_cells)} code cells ho
 for idx, c in enumerate(code_cells):
     test_assert(len(c.get("outputs", [])) > 0, f"Code cell {idx+1} đã được thực thi và chứa output sẵn")
 
+# 5. Kiểm thử độc lập Restart & Run All (Mô phỏng chạy mới từ đầu)
+import matplotlib
+matplotlib.use('Agg')
+import warnings
+warnings.filterwarnings('ignore')
+nb_scope = {}
+for idx, c in enumerate(code_cells):
+    src = "".join(c.get("source", []))
+    try:
+        exec(src, nb_scope)
+    except Exception as exc:
+        raise AssertionError(f"Code cell {idx+1} thất bại khi chạy lại: {type(exc).__name__}: {exc}")
+test_assert(True, "Notebook Thu_Experiments.ipynb thực thi thành công từ đầu đến cuối (Restart & Run All clean)")
+
 # --- LAYER 2: KIỂM ĐỊNH HỌC THUẬT & TOÁN HỌC (ACADEMIC & STATISTICAL INTEGRITY) ---
 print("\n--- [LỚP 2: HỌC THUẬT] Đối chuẩn số liệu toán học, công thức & phân tích ---")
 
-# 1. Independent Re-computation
-X_tr = train.drop(columns=["quality"])
-y_tr = train["quality"]
+# 1. Nạp Baseline từ Member 4 (Tuyệt đối không refit lại mô hình 11 biến)
+import joblib
+baseline_model_path = ROOT / "models/baseline_linear_regression.joblib"
+test_assert(baseline_model_path.is_file(), "Model baseline_linear_regression.joblib tồn tại (kế thừa từ Member 4)")
+
+m_base = joblib.load(baseline_model_path)
 X_te = test.drop(columns=["quality"])
 y_te = test["quality"]
-
-# Baseline model
-m_base = LinearRegression().fit(X_tr, y_tr)
 y_hat_base = m_base.predict(X_te)
 test_assert(np.allclose(y_hat_base, base_pred["predicted_quality"].to_numpy(), atol=1e-6),
-            "Dự đoán Baseline khớp tuyệt đối nghiệm giải tích Least Squares (sai số < 10^-6)")
+            "Dự đoán Baseline từ model của Khuê khớp tuyệt đối baseline_test_predictions.csv (không refit)")
 
-# Alcohol model
+# 2. Huấn luyện duy nhất mô hình Alcohol theo đúng phân công Member 5
+y_tr = train["quality"]
 m_alc = LinearRegression().fit(train[["alcohol"]], y_tr)
 y_hat_alc = m_alc.predict(test[["alcohol"]])
 
