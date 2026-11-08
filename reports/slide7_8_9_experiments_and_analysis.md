@@ -33,7 +33,7 @@ Toàn bộ công việc kết nối chặt chẽ và nhất quán với các th�
 
 ### 2.2. Bảng số liệu đối chuẩn thực nghiệm trên Test Set (320 mẫu)
 
-| Chỉ số (Metric) | Baseline (11 features) | Alcohol only (1 feature) | Chênh lệch ($\Delta$) | Phân tích học thuật & Ý nghĩa thực nghiệm |
+| Chỉ số (Metric) | Baseline (11 features) | Alcohol only (1 feature) | Chênh lệch ($\Delta = \text{Baseline} - \text{Alcohol}$) | Phân tích học thuật & Ý nghĩa thực nghiệm |
 | :--- | :---: | :---: | :---: | :--- |
 | **MSE** | **0.390025** | 0.499528 | $-0.109503$ ($-21.92\%$) | Mô hình đa biến giảm $21.92\%$ tổng bình phương sai số so với mô hình đơn biến |
 | **RMSE** | **0.624520** | 0.706773 | $-0.082253$ ($-11.64\%$) | Sai số trung bình của Baseline là $0.62$ điểm, thấp hơn mức $0.71$ điểm của mô hình 1 biến |
@@ -101,7 +101,7 @@ Slide 9 thể hiện tư duy phản biện khoa học (Critical Thinking) của 
    - Điểm chất lượng là biến thứ bậc rời rạc ($y \in \{3, 4, 5, 6, 7, 8\}$).
    - Mô hình Linear Regression ngầm định khoảng cách toán học giữa các bước nhảy là đồng nhất: khoảng cách vị giác từ điểm 3 lên 4 được giả định bằng đúng từ 7 lên 8. Trên thực tế cảm quan con người, sự khác biệt giữa một chai rượu "hỏng/kém" lên "uống được" hoàn toàn khác với từ "ngon" lên "hảo hạng".
 2. **Mất cân bằng dữ liệu nghiêm trọng (Severe Class Imbalance):**
-   - Hai mức điểm 5 và 6 chiếm tới **$81.88\%$** tập kiểm thử và $82.4\%$ toàn bộ dataset.
+   - Hai mức điểm 5 và 6 chiếm tới **$81.88\%$** tập kiểm thử (262 / 320 mẫu) và **$82.49\%$** toàn bộ dataset (1.319 / 1.599 mẫu).
    - Nhóm điểm cực đoan 3 và 8 chỉ chiếm lần lượt $0.31\%$ và $1.56\%$.
    - Thuật toán OLS tối thiểu hóa tổng bình phương phần dư trên toàn bộ mẫu, do đó siêu phẳng hồi quy ưu tiên tối ưu hóa cho vùng đa số mẫu để giảm tổng MSE, dẫn tới việc dự đoán kém ở các lớp thiểu số.
 3. **Dữ liệu quan sát (Observational Data) vs. Suy diễn can thiệp nhân quả (Causal Inference):**

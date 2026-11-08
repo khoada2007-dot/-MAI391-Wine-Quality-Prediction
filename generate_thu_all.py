@@ -34,6 +34,7 @@ import pandas as pd
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import joblib
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
@@ -93,10 +94,13 @@ def compute_metrics(y_true, y_pred):
 mse_alc_tr, rmse_alc_tr, mae_alc_tr, r2_alc_tr = compute_metrics(y_train, y_pred_alc_train)
 mse_alc_te, rmse_alc_te, mae_alc_te, r2_alc_te = compute_metrics(y_test, y_pred_alc_test)
 
-# Baseline metrics
-m_full = LinearRegression().fit(train_df.drop(columns=["quality"]), y_train)
-y_pred_base_train = m_full.predict(train_df.drop(columns=["quality"]))
+# Baseline metrics: Nạp trực tiếp từ models/baseline_linear_regression.joblib (Kế thừa từ Member 4 - Khuê)
+baseline_model = joblib.load(MODELS_DIR / "baseline_linear_regression.joblib")
+y_pred_base_train = baseline_model.predict(train_df.drop(columns=["quality"]))
 y_pred_base_test = baseline_preds["predicted_quality"].to_numpy()
+
+# Xác nhận nghiệm dự đoán của Baseline Model khớp tuyệt đối dữ liệu kiểm thử
+assert np.allclose(baseline_model.predict(test_df.drop(columns=["quality"])), y_pred_base_test, atol=1e-6)
 
 mse_base_tr, rmse_base_tr, mae_base_tr, r2_base_tr = compute_metrics(y_train, y_pred_base_train)
 mse_base_te, rmse_base_te, mae_base_te, r2_base_te = compute_metrics(y_test, y_pred_base_test)
@@ -121,11 +125,13 @@ df_comparison_test = pd.DataFrame([
     }
 ])
 
+# Quy chuẩn chênh lệch học thuật: Δ = Baseline - Alcohol (Năng lực gia tăng của mô hình đa biến so với đơn biến)
+# Dấu âm cho MSE/RMSE/MAE thể hiện mức giảm sai số; Dấu dương cho R² thể hiện mức tăng phương sai giải thích
 df_slide7_metrics = pd.DataFrame([
-    {"Metric": "MSE", "Baseline (11 features)": mse_base_te, "Alcohol only (1 feature)": mse_alc_te, "Chênh lệch (Δ)": mse_alc_te - mse_base_te},
-    {"Metric": "RMSE", "Baseline (11 features)": rmse_base_te, "Alcohol only (1 feature)": rmse_alc_te, "Chênh lệch (Δ)": rmse_alc_te - rmse_base_te},
-    {"Metric": "MAE", "Baseline (11 features)": mae_base_te, "Alcohol only (1 feature)": mae_alc_te, "Chênh lệch (Δ)": mae_alc_te - mae_base_te},
-    {"Metric": "R²", "Baseline (11 features)": r2_base_te, "Alcohol only (1 feature)": r2_alc_te, "Chênh lệch (Δ)": r2_alc_te - r2_base_te},
+    {"Metric": "MSE", "Baseline (11 features)": mse_base_te, "Alcohol only (1 feature)": mse_alc_te, "Chênh lệch (Δ = Baseline - Alcohol)": mse_base_te - mse_alc_te},
+    {"Metric": "RMSE", "Baseline (11 features)": rmse_base_te, "Alcohol only (1 feature)": rmse_alc_te, "Chênh lệch (Δ = Baseline - Alcohol)": rmse_base_te - rmse_alc_te},
+    {"Metric": "MAE", "Baseline (11 features)": mae_base_te, "Alcohol only (1 feature)": mae_alc_te, "Chênh lệch (Δ = Baseline - Alcohol)": mae_base_te - mae_alc_te},
+    {"Metric": "R²", "Baseline (11 features)": r2_base_te, "Alcohol only (1 feature)": r2_alc_te, "Chênh lệch (Δ = Baseline - Alcohol)": r2_base_te - r2_alc_te},
 ])
 
 # Save comparison files
@@ -186,7 +192,7 @@ ax.axhline(0, color='#d62728', linestyle='--', linewidth=2, label='Zero Residual
 z = np.polyfit(predicted, residual, 1)
 p = np.poly1d(z)
 pred_sorted = np.sort(predicted)
-ax.plot(pred_sorted, p(pred_sorted), color='black', linestyle=':', linewidth=1.8, label=f'Trendline (Slope = {z[0]:.2f} ≈ 0)')
+ax.plot(pred_sorted, p(pred_sorted), color='black', linestyle=':', linewidth=1.8, label=f'Trendline (Slope = {z[0]:+.2f})')
 ax.set_title('Baseline Model: Residual Plot (Error Diagnostics)', fontsize=13, fontweight='bold', pad=12)
 ax.set_xlabel('Predicted Quality (ŷ)', fontsize=11, labelpad=8)
 ax.set_ylabel('Residual: e = y - ŷ (Actual - Predicted)', fontsize=11, labelpad=8)
@@ -450,10 +456,10 @@ nb_cells = [
             "mse_base, rmse_base, mae_base, r2_base = compute_metrics(baseline_preds['actual_quality'], baseline_preds['predicted_quality'])\n",
             "\n",
             "df_slide7_metrics = pd.DataFrame([\n",
-            "    {'Metric': 'MSE', 'Baseline (11 features)': mse_base, 'Alcohol only (1 feature)': mse_alc, 'Chênh lệch (Δ)': mse_alc - mse_base},\n",
-            "    {'Metric': 'RMSE', 'Baseline (11 features)': rmse_base, 'Alcohol only (1 feature)': rmse_alc, 'Chênh lệch (Δ)': rmse_alc - rmse_base},\n",
-            "    {'Metric': 'MAE', 'Baseline (11 features)': mae_base, 'Alcohol only (1 feature)': mae_alc, 'Chênh lệch (Δ)': mae_alc - mae_base},\n",
-            "    {'Metric': 'R²', 'Baseline (11 features)': r2_base, 'Alcohol only (1 feature)': r2_alc, 'Chênh lệch (Δ)': r2_alc - r2_base},\n",
+            "    {'Metric': 'MSE', 'Baseline (11 features)': mse_base, 'Alcohol only (1 feature)': mse_alc, 'Chênh lệch (Δ = Baseline - Alcohol)': mse_base - mse_alc},\n",
+            "    {'Metric': 'RMSE', 'Baseline (11 features)': rmse_base, 'Alcohol only (1 feature)': rmse_alc, 'Chênh lệch (Δ = Baseline - Alcohol)': rmse_base - rmse_alc},\n",
+            "    {'Metric': 'MAE', 'Baseline (11 features)': mae_base, 'Alcohol only (1 feature)': mae_alc, 'Chênh lệch (Δ = Baseline - Alcohol)': mae_base - mae_alc},\n",
+            "    {'Metric': 'R²', 'Baseline (11 features)': r2_base, 'Alcohol only (1 feature)': r2_alc, 'Chênh lệch (Δ = Baseline - Alcohol)': r2_base - r2_alc},\n",
             "])\n",
             "\n",
             "print('=== BẢNG SO SÁNH CHỈ SỐ TRÊN TEST SET (SLIDE 7) ===')\n",
@@ -503,6 +509,12 @@ nb_cells = [
             "lo, hi = min(actual.min(), predicted.min()) - 0.2, max(actual.max(), predicted.max()) + 0.2\n",
             "ax.plot([lo, hi], [lo, hi], color='#d62728', linestyle='--', linewidth=2, label='Perfect Prediction (y = ŷ)')\n",
             "ax.axhspan(4.7, 6.81, color='#2ca02c', alpha=0.08, label='Prediction Range [4.71, 6.80]')\n",
+            "ax.annotate('Regression to the mean:\\nOverpredicts poor wines (3-4)', xy=(3, 5.23), xytext=(3.2, 6.3),\n",
+            "            arrowprops=dict(facecolor='black', shrink=0.05, width=1, headwidth=6),\n",
+            "            fontsize=8.5, fontweight='semibold', bbox=dict(boxstyle='round,pad=0.3', facecolor='#fff2cc', alpha=0.9))\n",
+            "ax.annotate('Regression to the mean:\\nUnderpredicts great wines (7-8)', xy=(8, 6.56), xytext=(6.5, 4.9),\n",
+            "            arrowprops=dict(facecolor='black', shrink=0.05, width=1, headwidth=6),\n",
+            "            fontsize=8.5, fontweight='semibold', bbox=dict(boxstyle='round,pad=0.3', facecolor='#fff2cc', alpha=0.9))\n",
             "ax.set_title('Baseline Model: Actual vs. Predicted Quality', fontsize=12, fontweight='bold')\n",
             "ax.set_xlabel('Actual Quality Score (Discrete: 3 - 8)', fontsize=10)\n",
             "ax.set_ylabel('Predicted Quality Score (Continuous)', fontsize=10)\n",
@@ -517,12 +529,16 @@ nb_cells = [
             "z = np.polyfit(predicted, residual, 1)\n",
             "p = np.poly1d(z)\n",
             "pred_sorted = np.sort(predicted)\n",
-            "ax.plot(pred_sorted, p(pred_sorted), color='black', linestyle=':', linewidth=1.8, label=f'Trendline (Slope = {z[0]:.2f} ≈ 0)')\n",
-            "ax.set_title('Baseline Model: Residual Plot', fontsize=12, fontweight='bold')\n",
+            "ax.plot(pred_sorted, p(pred_sorted), color='black', linestyle=':', linewidth=1.8, label=f'Trendline (Slope = {z[0]:+.2f})')\n",
+            "ax.set_title('Baseline Model: Residual Plot (Error Diagnostics)', fontsize=12, fontweight='bold')\n",
             "ax.set_xlabel('Predicted Quality (ŷ)', fontsize=10)\n",
-            "ax.set_ylabel('Residual: e = y - ŷ', fontsize=10)\n",
+            "ax.set_ylabel('Residual: e = y - ŷ (Actual - Predicted)', fontsize=10)\n",
             "ax.grid(True, linestyle=':', alpha=0.6)\n",
             "ax.legend(loc='lower left')\n",
+            "ax.text(0.97, 0.93,\n",
+            "        'Test Residual Diagnostic:\\n• Empirical slope = +0.10 shows mild linear drift on test set\\n• Residuals cluster around zero line (e = 0) in central range [5.2, 6.2]\\n• Out-of-sample dispersion widens at extremes (discrete boundary limits)',\n",
+            "        transform=ax.transAxes, fontsize=8.5, verticalalignment='top', horizontalalignment='right',\n",
+            "        bbox=dict(boxstyle='round,pad=0.4', facecolor='#eef2f7', edgecolor='#b0c4de'))\n",
             "plt.show()"
         ]
     },
@@ -612,6 +628,9 @@ nb_cells = [
             "ax1.set_xticklabels(df_quality_tiers['Quality Score'])\n",
             "ax1.legend(loc='upper right')\n",
             "ax1.grid(True, linestyle=':', alpha=0.5, axis='y')\n",
+            "for i, row in df_quality_tiers.iterrows():\n",
+            "    ax1.annotate(f\"n={int(row['Sample Count (n)'])}\", (x[i], max(row['MAE'], abs(row['Mean Residual (Bias)'])) + 0.1),\n",
+            "                 ha='center', fontsize=8.5, color='#333333', fontweight='semibold')\n",
             "plt.show()"
         ]
     },

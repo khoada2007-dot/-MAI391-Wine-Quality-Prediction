@@ -1,5 +1,5 @@
-﻿Metric,Baseline (11 features),Alcohol only (1 feature),Chênh lệch (Δ)
-MSE,0.390025,0.499528,0.109503
-RMSE,0.624520,0.706773,0.082253
-MAE,0.503530,0.574966,0.071436
-R²,0.403180,0.235618,-0.167562
+﻿Metric,Baseline (11 features),Alcohol only (1 feature),Chênh lệch (Δ = Baseline - Alcohol)
+MSE,0.390025,0.499528,-0.109503
+RMSE,0.624520,0.706773,-0.082253
+MAE,0.503530,0.574966,-0.071436
+R²,0.403180,0.235618,0.167562

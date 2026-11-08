@@ -100,19 +100,28 @@ test_assert(len(code_cells) >= 4, f"Notebook có {len(code_cells)} code cells ho
 for idx, c in enumerate(code_cells):
     test_assert(len(c.get("outputs", [])) > 0, f"Code cell {idx+1} đã được thực thi và chứa output sẵn")
 
-# 5. Kiểm thử độc lập Restart & Run All (Mô phỏng chạy mới từ đầu)
+# 5. Kiểm thử độc lập Restart & Run All (Mô phỏng chạy mới từ đầu) & Tính toàn vẹn mã nguồn
 import matplotlib
 matplotlib.use('Agg')
 import warnings
 warnings.filterwarnings('ignore')
 nb_scope = {}
 for idx, c in enumerate(code_cells):
-    src = "".join(c.get("source", []))
+    src_lines = [line for line in c.get("source", []) if not line.strip().startswith("%")]
+    src = "".join(src_lines)
     try:
         exec(src, nb_scope)
     except Exception as exc:
         raise AssertionError(f"Code cell {idx+1} thất bại khi chạy lại: {type(exc).__name__}: {exc}")
 test_assert(True, "Notebook Thu_Experiments.ipynb thực thi thành công từ đầu đến cuối (Restart & Run All clean)")
+
+# Kiểm tra tính toàn vẹn và đồng bộ giữa code source và outputs
+c4_src = "".join(code_cells[3].get("source", []))
+c5_src = "".join(code_cells[4].get("source", []))
+test_assert("ax.annotate" in c4_src and "Test Residual Diagnostic" in c4_src,
+            "Cell 4 chứa đầy đủ mã nguồn chú thích (ax.annotate & Test Residual Diagnostic text box)")
+test_assert("Sample Count (n)" in c5_src,
+            "Cell 5 chứa đầy đủ mã nguồn chú thích số lượng mẫu trên từng cột phân lớp (Sample Count annotation)")
 
 # --- LAYER 2: KIỂM ĐỊNH HỌC THUẬT & TOÁN HỌC (ACADEMIC & STATISTICAL INTEGRITY) ---
 print("\n--- [LỚP 2: HỌC THUẬT] Đối chuẩn số liệu toán học, công thức & phân tích ---")
@@ -147,14 +156,20 @@ r2_alc = r2_score(y_te, y_hat_alc)
 
 # Verify against alcohol_experiment_metrics.csv
 alc_met = pd.read_csv(REPORTS_DIR / "alcohol_experiment_metrics.csv")
+diff_col = "Chênh lệch (Δ = Baseline - Alcohol)"
+test_assert(diff_col in alc_met.columns, f"Cột '{diff_col}' tồn tại và được quy chuẩn rõ ràng quy ước dấu")
 test_assert(abs(alc_met.loc[alc_met["Metric"] == "MSE", "Baseline (11 features)"].values[0] - mse_base) < 1e-5,
             f"Số liệu Baseline MSE khớp: {mse_base:.6f}")
 test_assert(abs(alc_met.loc[alc_met["Metric"] == "MSE", "Alcohol only (1 feature)"].values[0] - mse_alc) < 1e-5,
             f"Số liệu Alcohol MSE khớp: {mse_alc:.6f}")
+test_assert(alc_met.loc[alc_met["Metric"] == "MSE", diff_col].values[0] < 0,
+            "Chênh lệch MSE âm (Baseline giảm MSE so với Alcohol)")
 test_assert(abs(alc_met.loc[alc_met["Metric"] == "R²", "Baseline (11 features)"].values[0] - r2_base) < 1e-5,
             f"Số liệu Baseline R² khớp: {r2_base:.6f}")
 test_assert(abs(alc_met.loc[alc_met["Metric"] == "R²", "Alcohol only (1 feature)"].values[0] - r2_alc) < 1e-5,
             f"Số liệu Alcohol R² khớp: {r2_alc:.6f}")
+test_assert(alc_met.loc[alc_met["Metric"] == "R²", diff_col].values[0] > 0,
+            "Chênh lệch R² dương (Baseline tăng R² so với Alcohol)")
 
 # Verify math derivations
 ratio_r2 = (r2_alc / r2_base) * 100
@@ -174,10 +189,10 @@ count_5_6 = err_tier.loc[err_tier["Quality Score"].isin([5, 6]), "Sample Count (
 pct_5_6 = (count_5_6 / 320) * 100
 test_assert(abs(pct_5_6 - 81.875) < 1e-3, f"Tỷ lệ mẫu chất lượng 5 và 6 ({pct_5_6:.3f}%) khớp chuẩn 81.88%")
 
-# Verify OLS Orthogonality
+# Verify Residual Behavior
 residuals_base = y_te.to_numpy() - y_hat_base
 trend_slope, trend_intercept = np.polyfit(y_hat_base, residuals_base, 1)
-test_assert(abs(trend_slope - 0.0987) < 1e-3, f"Độ dốc phần dư vs dự đoán: {trend_slope:.4f} xấp xỉ 0 (OLS Orthogonality)")
+test_assert(abs(trend_slope - 0.0987) < 1e-3, f"Độ dốc phần dư test vs dự đoán: {trend_slope:.4f} xấp xỉ +0.10 (Test Residual Diagnostic)")
 test_assert(abs(residuals_base.mean() - 0.0330) < 1e-3, f"Kỳ vọng sai số test: {residuals_base.mean():.4f} xấp xỉ 0")
 
 print("\n=====================================================================")
